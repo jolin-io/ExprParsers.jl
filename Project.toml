@@ -1,0 +1,4 @@
+name = "ASTParser"
+uuid = "3311a090-b55d-11e9-176d-dbdfc6a88253"
+authors = ["Sahm Stephan <s.sahm@reply.de>"]
+version = "0.1.0"
