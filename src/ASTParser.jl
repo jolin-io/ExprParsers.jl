@@ -1,52 +1,25 @@
-module ASTParser
-export @parserfactory, toAST, 
-  SymbolParser, ExprParser, ReferenceExprParser, TypeExprParser, CallExprParser
+"""
+    ASTParser
 
-# interface
-# =========
-
-#=
 the main interface encompass just three concepts, which seamlessly interact with oneanother
-- @parserfactory (internally Parser): create highly flexible and nestable parsers
-- function match: compares a matcher with a value, also defining a parsed return value
+- macro @parserfactory: easily create definitions for highly flexible and nestable parsers
+- function ASTParser.match: compares a matcher with a value, and returns a parsed value
 - function toAST: transforms parsed values back to AbstractSyntaxTrees
-=#
-
 """
-  This is only for internal use. Please see @parserfactory for the public interface
+module ASTParser
+export @passert, ParseError,
+  Matchers, Matcher, match, anything,
+  Parsers, toAST, @parserfactory, Parser, Parsed,
+  Named, Named_Parsed, Indexed, Indexed_Parsed,
+  nodefault, NoDefault
 
-Types which constructor creates a Parser that can parses Expr
-into a struct with identical fields, where then the parsed values will be SingletonParser_ValuesParsed
-"""
-abstract type Parser end 
+include("exceptions.jl")
 
+include("Matchers.jl")
+using .Matchers
+# we need to assign a const to match in order to refer to Matchers.match and not Base.match
+const match = Matchers.match
 
-"""
-  match something against a value
-
-will throw AssertError if does not match
-
-if matches, by default will return the value if matches
-however Parsers will be called instead and return their parsed value
-"""
-match(parser::Parser, value) = parser(value)
-function match(matcher, value)
-  @assert matcher == value
-  value
-end
-
-"""
-  convert called information back to AbstractSyntaxTree
-
-defaults to returning same value
-however if something knows about how it can be translated, just overload the function
-"""
-toAST(a) = a
-
-
-include("utils.jl")
-include("matchers.jl")
-include("syntax.jl")
-include("parser.jl")
-
+include("Parsers/Parsers.jl")
+using .Parsers
 end # module
