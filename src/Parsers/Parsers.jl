@@ -373,6 +373,82 @@ toAST_Call(pp, iscurlies::False, iswheres::False) = :(
 """
 parses:
 ```
+a(b, c::Any)
+a(b::B, c) where B
+(::Any, c::C) where {C <: Number}
+```
+"""
+@parserfactory struct Signature
+  name = anything
+  curlies = anything
+  args = anything
+  kwargs = anything
+  wheres = anything
+end
+
+function (p::Signature)(expr::Base.Expr)
+  @passert expr.head in (:where, :call, :tuple)
+  # we don't reuse ParsedCallExpr because functions-signatures can actually be anonymous
+  call, wheres = split_where(expr)
+  @passert call isa Base.Expr  # until before here we still match assignments
+  @passert call.head in (:tuple, :call)
+  isanonymous = call.head == :tuple
+
+  name, curlies, args, kwargs = if isanonymous
+    if _is_kws(call.args[1])
+      nothing, [], call.args[2:end], call.args[1].args
+    else
+      nothing, [], call.args, []
+    end
+  else
+    parsed = Call()(call)
+    parsed.name, parsed.curlies, parsed.args, parsed.kwargs
+  end
+  p(name = name, curlies = curlies, args = args, kwargs = kwargs, wheres = wheres)
+end
+
+toAST(pp::Parsed(Signature)) = _toAST_Signature(pp, pp.name, Val{nonempty(pp.curlies)}(), Val{nonempty(pp.kwargs)}(), Val{nonempty(pp.wheres)}())
+_toAST_Signature(pp, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. pp.curlies = $(pp.curlies)")
+_toAST_Signature(pp, ::Nothing, ::False, iskwargs::False, iswheres::False) = :(
+  ($(toAST(pp.args)...),)
+)
+_toAST_Signature(pp, ::Nothing, ::False, iskwargs::True, iswheres::False) = :(
+  ($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...))
+)
+_toAST_Signature(pp, ::Nothing, ::False, iskwargs::False, iswheres::True) = :(
+  ($(toAST(pp.args)...),) where {$(toAST(pp.wheres)...)}
+)
+_toAST_Signature(pp, ::Nothing, ::False, iskwargs::True, iswheres::True) = :(
+  ($(toAST(pp.args)...),; $(toAST(pp.kwargs)...)) where {$(toAST(pp.wheres)...)}
+)
+_toAST_Signature(pp, name, iscurlies::True, iskwargs::True, iswheres::True) = :(
+  $(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...)) where {$(toAST(pp.wheres)...)}
+)
+_toAST_Signature(pp, name, iscurlies::True, iskwargs::True, iswheres::False) = :(
+  $(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...))
+)
+_toAST_Signature(pp, name, iscurlies::True, iskwargs::False, iswheres::True) = :(
+  $(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...),) where {$(toAST(pp.wheres)...)}
+)
+_toAST_Signature(pp, name, iscurlies::True, iskwargs::False, iswheres::False) = :(
+  $(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...),)
+)
+_toAST_Signature(pp, name, iscurlies::False, iskwargs::True, iswheres::True) = :(
+  $(toAST(pp.name))($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...)) where {$(toAST(pp.wheres)...)}
+)
+_toAST_Signature(pp, name, iscurlies::False, iskwargs::True, iswheres::False) = :(
+  $(toAST(pp.name))($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...))
+)
+_toAST_Signature(pp, name, iscurlies::False, iskwargs::False, iswheres::True) = :(
+  $(toAST(pp.name))($(toAST(pp.args)...),) where {$(toAST(pp.wheres)...)}
+)
+_toAST_Signature(pp, name, iscurlies::False, iskwargs::False, iswheres::False) = :(
+  $(toAST(pp.name))($(toAST(pp.args)...),)
+)
+
+"""
+parses:
+```
 function a(b, c) where B
   d
 end
@@ -393,89 +469,25 @@ function (p::Function)(expr::Base.Expr)
   @passert length(expr.args) == 2
   body = expr.args[2]
 
-  # we don't reuse ParsedCallExpr because functions can actually be anonymous
-  call, wheres = split_where(expr.args[1])
-  @passert call isa Base.Expr  # until before here we still match assignments
-  @passert call.head in (:tuple, :call)
-  isanonymous = call.head == :tuple
-
-  name, curlies, args, kwargs = if isanonymous
-    if _is_kws(call.args[1])
-      nothing, [], call.args[2:end], call.args[1].args
-    else
-      nothing, [], call.args, []
-    end
-  else
-    parsed = Call()(call)
-    parsed.name, parsed.curlies, parsed.args, parsed.kwargs
-  end
-  p(name = name, curlies = curlies, args = args, kwargs = kwargs, wheres = wheres, body = body)
+  signature = Signature()(expr.args[1])
+  p(name = signature.name,
+    curlies = signature.curlies,
+    args = signature.args,
+    kwargs = signature.kwargs,
+    wheres = signature.wheres,
+    body = body)
 end
 
-
-toAST(pp::Parsed(Function)) = _toAST_Function(pp, pp.name, Val{nonempty(pp.curlies)}(), Val{nonempty(pp.kwargs)}(), Val{nonempty(pp.wheres)}())
-_toAST_Function(pp, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. pp.curlies = $(pp.curlies)")
-_toAST_Function(pp, ::Nothing, ::False, iskwargs::False, iswheres::False) = Base.Expr(
-  :function,
-  :(($(toAST(pp.args)...),)),
-  toAST(pp.body)
-)
-_toAST_Function(pp, ::Nothing, ::False, iskwargs::True, iswheres::False) = Base.Expr(
-  :function,
-  :(($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...))),
-  toAST(pp.body)
-)
-_toAST_Function(pp, ::Nothing, ::False, iskwargs::False, iswheres::True) = Base.Expr(
-  :function,
-  :(($(toAST(pp.args)...),) where {$(toAST(pp.wheres)...)}),
-  toAST(pp.body)
-)
-_toAST_Function(pp, ::Nothing, ::False, iskwargs::True, iswheres::True) = Base.Expr(
-  :function,
-  :(($(toAST(pp.args)...),; $(toAST(pp.kwargs)...)) where {$(toAST(pp.wheres)...)}),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::True, iskwargs::True, iswheres::True) = Base.Expr(
-  :function,
-  :($(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...)) where {$(toAST(pp.wheres)...)}),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::True, iskwargs::True, iswheres::False) = Base.Expr(
-  :function,
-  :($(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...))),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::True, iskwargs::False, iswheres::True) = Base.Expr(
-  :function,
-  :($(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...),) where {$(toAST(pp.wheres)...)}),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::True, iskwargs::False, iswheres::False) = Base.Expr(
-  :function,
-  :($(toAST(pp.name)){$(toAST(pp.curlies)...)}($(toAST(pp.args)...),)),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::False, iskwargs::True, iswheres::True) = Base.Expr(
-  :function,
-  :($(toAST(pp.name))($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...)) where {$(toAST(pp.wheres)...)}),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::False, iskwargs::True, iswheres::False) = Base.Expr(
-  :function,
-  :($(toAST(pp.name))($(toAST(pp.args)...), ; $(toAST(pp.kwargs)...))),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::False, iskwargs::False, iswheres::True) = Base.Expr(
-  :function,
-  :($(toAST(pp.name))($(toAST(pp.args)...),) where {$(toAST(pp.wheres)...)}),
-  toAST(pp.body)
-)
-_toAST_Function(pp, name, iscurlies::False, iskwargs::False, iswheres::False) = Base.Expr(
-  :function,
-  :($(toAST(pp.name))($(toAST(pp.args)...),)),
-  toAST(pp.body)
-)
-
+function toAST(pp::Parsed(Function))
+  signature = Signature_Parsed(
+    name = pp.name,
+    curlies = pp.curlies,
+    args = pp.args,
+    kwargs = pp.kwargs,
+    wheres = pp.wheres,
+  )
+  Base.Expr(:function, toAST(signature), toAST(pp.body))
+end
 
 
 """

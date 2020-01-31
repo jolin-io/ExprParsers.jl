@@ -200,6 +200,47 @@ end
   end)
 end
 
+@testset "Signature" begin
+  parser = Parsers.Signature()
+
+  expr = :(
+    f(a::String, b::Int...; c = 5, d...)
+  )
+  parsed = parser(expr)
+  @test parsed.name == :f
+  @test parsed.args == [:(a::String), :(b::Int...)]
+  @test parsed.kwargs == [Expr(:kw, :c, 5), :(d...)]
+  @test parsed.curlies == []
+  @test parsed.wheres == []
+  test_closure(parser, expr)
+
+  expr = :(
+    (a::String, b::Int...; c = 5, d...) where B where A
+  )
+  parsed = parser(expr)
+  @test parsed.name == nothing
+  @test parsed.args == [:(a::String), :(b::Int...)]
+  @test parsed.kwargs == [Expr(:kw, :c, 5), :(d...)]
+  @test parsed.curlies == []
+  @test parsed.wheres == [:A, :B]
+  test_closure(parser, expr)
+
+  expr = :(
+    f{A}(a::String, b::Int...; c = 5, d...) where {A, B}
+  )
+  parsed = parser(expr)
+  @test parsed.name == :f
+  @test parsed.args == [:(a::String), :(b::Int...)]
+  @test parsed.kwargs == [Expr(:kw, :c, 5), :(d...)]
+  @test parsed.curlies == [:A]
+  @test parsed.wheres == [:A, :B]
+  test_closure(parser, expr)
+
+  @test_throws ParseError parser(:(
+    f = 5
+  ))
+end
+
 @testset "Function" begin
   parser = Parsers.Function()
 
