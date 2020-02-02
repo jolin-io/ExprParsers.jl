@@ -478,17 +478,15 @@ function (p::Function)(expr::Base.Expr)
     body = body)
 end
 
-function toAST(pp::Parsed(Function))
-  signature = Signature_Parsed(
-    name = pp.name,
-    curlies = pp.curlies,
-    args = pp.args,
-    kwargs = pp.kwargs,
-    wheres = pp.wheres,
-  )
-  Base.Expr(:function, toAST(signature), toAST(pp.body))
-end
+toAST(pp::Parsed(Function)) = Base.Expr(:function, toAST(Signature_Parsed(pp)), toAST(pp.body))
 
+Signature_Parsed(pp::Function_Parsed) = Signature_Parsed(
+  name = pp.name,
+  curlies = pp.curlies,
+  args = pp.args,
+  kwargs = pp.kwargs,
+  wheres = pp.wheres,
+)
 
 """
 parses:
