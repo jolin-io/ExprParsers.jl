@@ -1,7 +1,7 @@
 name = "ASTParser"
 uuid = "3311a090-b55d-11e9-176d-dbdfc6a88253"
 authors = ["Sahm Stephan <stephan.sahm@gmx.de>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ProxyInterface = "90c4b210-f34a-11e9-1a87-5d0d3aaf0cab"
