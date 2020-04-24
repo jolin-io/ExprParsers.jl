@@ -1,12 +1,12 @@
 """
-    ASTParser
+    ExprParsers
 
 the main interface encompass just three concepts, which seamlessly interact with oneanother
 - macro @parserfactory: easily create definitions for highly flexible and nestable parsers
-- function ASTParser.match: compares a matcher with a value, and returns a parsed value
+- function ExprParsers.match: compares a matcher with a value, and returns a parsed value
 - function toAST: transforms parsed values back to AbstractSyntaxTrees
 """
-module ASTParser
+module ExprParsers
 export @passert, ParseError,
   Matchers, Matcher, match, anything,
   Parsers, toAST, @parserfactory, Parser, Parsed,
