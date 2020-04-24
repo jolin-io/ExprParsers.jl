@@ -1,7 +1,7 @@
 module Matchers
 # import ASTParser: @passert, ParseError
 import ProxyInterface
-using ASTParser
+using ExprParsers
 export Matcher, match, anything
 
 # Main Interface

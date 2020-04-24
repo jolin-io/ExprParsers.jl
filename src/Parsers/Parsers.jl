@@ -3,12 +3,12 @@ export toAST, @parserfactory, Parser, Parsed,
   Named, Named_Parsed, Indexed, Indexed_Parsed,
   nodefault, NoDefault
 
-using ASTParser
+using ExprParsers
 using Base.Iterators
 using SimpleMatch
 using StructEquality
 using ProxyInterface
-const match = ASTParser.match
+const match = ExprParsers.match
 
 include("Utils.jl")
 using .Utils

@@ -10,13 +10,13 @@ end
 ```
 to
 ```
-StructEquality.@def_structequal Base.@kwdef struct MySymbol <: ASTParser.Parsers.Parser
+StructEquality.@def_structequal Base.@kwdef struct MySymbol <: ExprParsers.Parsers.Parser
   symbol = anything
 end
-StructEquality.@def_structequal Base.@kwdef mutable struct MySymbol_Parsed{T} <: ASTParser.Parsers.Parsed
+StructEquality.@def_structequal Base.@kwdef mutable struct MySymbol_Parsed{T} <: ExprParsers.Parsers.Parsed
   symbol
 end
-ASTParser.Parsed(::Base.Type{MySymbol}) = MySymbol_Parsed
+ExprParsers.Parsed(::Base.Type{MySymbol}) = MySymbol_Parsed
 ```
 
 Additionally, the created MySymbol Parser supports the following parsing syntax
@@ -45,20 +45,20 @@ macro parserfactory(struct_expr)
   @assert !isa(struct_expr.args[2], Base.Expr) || struct_expr.args[2].head != :(<:) "please ommit the inheritance notation, it will be provided by the macro"
 
   # add inheritance
-  struct_expr.args[2] = :($(struct_expr.args[2]) <: ASTParser.Parsers.Parser)
-  mutable_struct_expr.args[2] = :($(mutable_struct_expr.args[2]) <: ASTParser.Parsers.Parsed)
+  struct_expr.args[2] = :($(struct_expr.args[2]) <: ExprParsers.Parsers.Parser)
+  mutable_struct_expr.args[2] = :($(mutable_struct_expr.args[2]) <: ExprParsers.Parsers.Parsed)
 
   # TODO Parsed(..) calls also for typeparameters?
   esc(quote
-    ASTParser.Parsers.StructEquality.@def_structequal Base.@kwdef $struct_expr
-    ASTParser.Parsers.StructEquality.@def_structequal Base.@kwdef $mutable_struct_expr
-    ASTParser.Parsers.Parsed(::Base.Type{<:$struct_name}) = $mutable_struct_name
+    ExprParsers.Parsers.StructEquality.@def_structequal Base.@kwdef $struct_expr
+    ExprParsers.Parsers.StructEquality.@def_structequal Base.@kwdef $mutable_struct_expr
+    ExprParsers.Parsers.Parsed(::Base.Type{<:$struct_name}) = $mutable_struct_name
 
     # this won't be needed when function syntax for abstract types can be overloaded
     # should be there in julia 1.3.0 https://github.com/JuliaLang/julia/pull/31916
     function (parser::$struct_name)(;kw...)
       names = kw.itr  # kw isa Base.Iterators.Pairs
-      matches = [ASTParser.match(Base.getproperty(parser, name), value) for (name, value) in kw]
+      matches = [ExprParsers.match(Base.getproperty(parser, name), value) for (name, value) in kw]
       kw′ = Base.NamedTuple{names}(matches)
       $mutable_struct_name(;kw′...)
     end
