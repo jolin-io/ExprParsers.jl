@@ -1,5 +1,5 @@
 name = "ExprParsers"
-uuid = "3311a090-b55d-11e9-176d-dbdfc6a88253"
+uuid = "c5caad1f-83bd-4ce8-ac8e-4b29921e994e"
 authors = ["Sahm Stephan <stephan.sahm@gmx.de>"]
 version = "0.1.1"
 
