@@ -10,8 +10,7 @@ module ExprParsers
 export EP, @passert, ParseError,
   parse_expr, to_expr,
   @exprparser, ExprParser, ExprParsed,
-  anything, AnyOf, AllOf, Iterator,
-  Named, Named_Parsed, Indexed, Indexed_Parsed
+  Iterator
 
 const EP = ExprParsers
 

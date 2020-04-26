@@ -6,7 +6,7 @@ using ExprParsers
 # ================
 
 @testset "Block" begin
-  parser = EP.Block(EP.Symbol(), :b, EP.Expr(:tuple, anything))
+  parser = EP.Block(EP.Symbol(), :b, EP.Expr(:tuple, EP.anything))
   @test_throws ParseError parse_expr(parser, quote
     5
     b
@@ -97,11 +97,11 @@ end
   expr = Expr(:head, :a1, 2, [3,4])
   parsed_expr = EP.Expr_Parsed(:head, [:a1, 2, [3,4]])
   @test parse_expr(EP.Expr(), expr) == parsed_expr
-  @test_throws ParseError parse_expr(EP.Expr(head = AnyOf(:hi, :ho)), expr)
-  @test parse_expr(EP.Expr(head = AnyOf(:hi, :ho, :head)), expr) == parsed_expr
+  @test_throws ParseError parse_expr(EP.Expr(head = EP.AnyOf(:hi, :ho)), expr)
+  @test parse_expr(EP.Expr(head = EP.AnyOf(:hi, :ho, :head)), expr) == parsed_expr
   @test_throws ParseError parse_expr(EP.Expr(args = [1,2]), expr)
   @test parse_expr(EP.Expr(args = [:a1, 2, [3,4]]), expr) == parsed_expr
-  @test parse_expr(EP.Expr(args = [:a1, 2, anything]), expr) == parsed_expr
+  @test parse_expr(EP.Expr(args = [:a1, 2, EP.anything]), expr) == parsed_expr
 
   # All Parsers should be Closure operators
   test_closure(EP.Expr(), expr)

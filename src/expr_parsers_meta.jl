@@ -117,12 +117,12 @@ get_object(nested, nested_index) = get_object(nested, nested_index, getproperty)
 function set_object!(nested, value, nested_index, get_key, set_key!)
   @assert length(nested_index) > 0 "we should never reach empty index in this recursion"
   if length(nested_index) == 1
-    # use the last index to update the object
+    # use the last index to update the final object
     set_key!(nested, value, nested_index[1])
   else
+    # otherwise recurse into subobject
     subobject = get_key(nested, nested_index[1])
-    newsubobject = set_object!(subobject, value, nested_index[2:end])
-    set_key!(nested, newsubobject, nested_index[1])
+    set_object!(subobject, value, nested_index[2:end])
   end
   nested
 end

@@ -8,23 +8,23 @@ using Test
   @test_throws ParseError parse_expr("hi", nothing)
 end
 
-@testset "parse_expr anything" begin
-  @test parse_expr(anything, 5) == 5
-  @test parse_expr(anything, "hi") == "hi"
-  @test parse_expr(anything, nothing) == nothing
+@testset "parse_expr EP.anything" begin
+  @test parse_expr(EP.anything, 5) == 5
+  @test parse_expr(EP.anything, "hi") == "hi"
+  @test parse_expr(EP.anything, nothing) == nothing
 end
 
 @testset "parse_expr vectors" begin
-  @test parse_expr([anything, anything], [1,2]) == [1,2]
-  @test parse_expr([anything, 2], [1,2]) == [1,2]
-  @test_throws ParseError parse_expr([anything, 3], [1,2]) == [1,2]
+  @test parse_expr([EP.anything, EP.anything], [1,2]) == [1,2]
+  @test parse_expr([EP.anything, 2], [1,2]) == [1,2]
+  @test_throws ParseError parse_expr([EP.anything, 3], [1,2]) == [1,2]
 end
 
 @testset "AnyOf,AllOf" begin
-  @test_throws ParseError parse_expr(AnyOf("hi", "ho", "hu"), "aa")
-  @test parse_expr(AnyOf("hi", "ho", "hu"), "hu") == "hu"
-  @test parse_expr(AllOf("a", anything), "a") == "a"
-  @test_throws ParseError parse_expr(AllOf("a", anything, "b"), "a")
+  @test_throws ParseError parse_expr(EP.AnyOf("hi", "ho", "hu"), "aa")
+  @test parse_expr(EP.AnyOf("hi", "ho", "hu"), "hu") == "hu"
+  @test parse_expr(EP.AllOf("a", EP.anything), "a") == "a"
+  @test_throws ParseError parse_expr(EP.AllOf("a", EP.anything, "b"), "a")
 end
 
 @testset "Isa" begin
@@ -45,5 +45,5 @@ end
 
 
 @testset "Iterator" begin
-  @test parse_expr(anything, [1,2,3,4]) == parse_expr(Iterator(repeated(anything)), [1,2,3,4]) == [1,2,3,4]
+  @test parse_expr(EP.anything, [1,2,3,4]) == parse_expr(Iterator(repeated(EP.anything)), [1,2,3,4]) == [1,2,3,4]
 end

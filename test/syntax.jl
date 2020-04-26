@@ -1,5 +1,5 @@
 @exprparser struct MySymbol
-  symbol = anything
+  symbol = EP.anything
 end
 @test MySymbol <: ExprParser
 @test MySymbol_Parsed <: ExprParsed

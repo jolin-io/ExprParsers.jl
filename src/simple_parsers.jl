@@ -15,7 +15,7 @@ struct Isa{T} <: SimpleParser
   Isa(::Base.Type{T}) where T = new{T}()
 end
 parse_expr(parser::Isa{T}, expr::T) where T = expr
-parse_expr(parser::Isa{T}, ::S) where {T, S} = throw(ParseError("Expected type $T, found type $S."))
+parse_expr(parser::Isa{T}, other::S) where {T, S} = throw(ParseError("Expected type $T, got $other of type $S."))
 
 const anything = Isa(Any)
 
