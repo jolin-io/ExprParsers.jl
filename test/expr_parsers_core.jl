@@ -45,5 +45,5 @@ end
 
 
 @testset "Iterator" begin
-  @test parse_expr(EP.anything, [1,2,3,4]) == parse_expr(Iterator(repeated(EP.anything)), [1,2,3,4]) == [1,2,3,4]
+  @test parse_expr(EP.anything, [1,2,3,4]) == parse_expr(EP.Utils.Iterator(repeated(EP.anything)), [1,2,3,4]) == [1,2,3,4]
 end

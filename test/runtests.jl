@@ -20,14 +20,14 @@ end
   include("syntax.jl")
 end
 
-@testset "simple_parsers" begin
-  include("simple_parsers.jl")
+@testset "expr_parsers_core" begin
+  include("expr_parsers_core.jl")
 end
 
-@testset "expr_parsers" begin
-  include("expr_parsers.jl")
+@testset "expr_parsers_with_parsed" begin
+  include("expr_parsers_with_parsed.jl")
 end
 
-@testset "expr_parsers_meta" begin
-  include("expr_parsers_meta.jl")
+@testset "expr_parsers_with_parsed_meta" begin
+  include("expr_parsers_with_parsed_meta.jl")
 end

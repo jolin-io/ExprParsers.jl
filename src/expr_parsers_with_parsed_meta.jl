@@ -6,7 +6,7 @@
 
 Named Parsers can be easily identified by Type. The Nametag is also passed to the parsed value.
 """
-@def_structequal struct Named{Name, T} <: ExprParser
+@def_structequal struct Named{Name, T} <: ExprParserWithParsed
   expr::T
   Named{Name}(parser::T) where {Name, T} = new{Name, T}(parser)
 end
@@ -27,7 +27,7 @@ to_expr(parsed::Named_Parsed) = to_expr(parsed.expr)
 """
 adds a Mapping Layer to a possibly nested Parser with which you can refer into a deep nested subparser by name
 """
-@def_structequal struct Indexed{T} <: ExprParser
+@def_structequal struct Indexed{T} <: ExprParserWithParsed
   _mapping::Dict
   _paths::Dict
   expr::T

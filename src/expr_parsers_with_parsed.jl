@@ -5,17 +5,28 @@ using ProxyInterface
 
 
 """
-All ExprParser have a common parse_expr method, namely that all struct fields are given directly as keyword arguments.
+All ExprParserWithParsed have a common parse_expr method, namely that all struct fields are given directly as keyword arguments.
 """
-function parse_expr(parser::ExprParser; kw...)
+function parse_expr(parser::ExprParserWithParsed; kw...)
   names = kw.itr  # kw isa Base.Iterators.Pairs
   matches = [parse_expr(getproperty(parser, name), value) for (name, value) in kw]
   kw′ = NamedTuple{names}(matches)
   ExprParsed(typeof(parser))(;kw′...)
 end
-function parse_expr(parser::ExprParser, any)
+function parse_expr(parser::ExprParserWithParsed, any)
   throw(ParseError("$(typeof(parser)) has no clause defined to capture Type '$(typeof(any))'. Got: $any"))
 end
+
+function Base.show(io::IO, exc::Union{ExprParserWithParsed, ExprParsed})
+  # TODO continue here - write a nice show so that fields are shown correctly instead of positions
+  println(io, "Failure{$T, $E}")
+  println(io, exc.exception)
+  for (exc′, bt′) in exc.stack
+    showerror(io, exc′, bt′)
+    println(io)
+  end
+end
+
 
 # ExprParsers
 # ===========
@@ -56,7 +67,7 @@ end
 """
 parses standard blocks of code or Vectors of Base.Expr
 """
-@def_structequal struct Block <: ExprParser
+@def_structequal struct Block <: ExprParserWithParsed
   exprs
   ignore_linenumbernodes::Bool
 
@@ -105,7 +116,7 @@ function parseexpr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator
     end
   end
   @passert isnothing(next_parser) "While exprs $exprs is exhausted, there is still a left over parser $(next_parser[1]) in the parsers $parsers."
-  args_parsed
+  exprs_parsed
 end
 function parseexpr_ignore_LineNumberNodes(parser::Expr, expr::Expr)
   @passert parser.head == expr.head

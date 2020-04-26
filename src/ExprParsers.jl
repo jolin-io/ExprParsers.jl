@@ -9,8 +9,7 @@ the main interface encompass just three concepts, which seamlessly interact with
 module ExprParsers
 export EP, @passert, ParseError,
   parse_expr, to_expr,
-  @exprparser, ExprParser, ExprParsed,
-  Iterator
+  @exprparser
 
 const EP = ExprParsers
 
@@ -59,22 +58,30 @@ to_expr(a::Union{Vector, Tuple}) = map(to_expr, a)  # reverses also Iterator
 to_expr(a::Base.Expr) = Base.Expr(a.head, to_expr(a.args)...)
 
 """
-  This is mainly for internal use. Please see @exprparser for the public interface
-
-Types which constructor creates a Parser that can parses Base.Expr
-into a struct with identical fields, where then the parsed values will be stored.
-``Parsed(MyParser)`` will return the Parsedtype
+all parsers in the ``ExprParsers`` package inherit from this type
 """
 abstract type ExprParser end
 
 """
-  maps Parser to respective Parsed type
+subtype of ``ExprParser`` which indicates that this parser actually constructs a `ExprParsed` object when calling
+``parse_expr``.
+The resulting `ExprParsed` object is a struct with identical fields like the parser,
+where then the parsed values will be stored.
 
-and is also abstract super type of all Parsed types
+This is mainly for internal usage. Please use ``@exprparser`` instead for the public interface.
+
+``ExprParsed(parser::ExprParserWithParsed)`` will return the corresponding ``ExprParsed`` type.
+"""
+abstract type ExprParserWithParsed <: ExprParser end
+
+"""
+  ExprParsed(parser::ExprParserWithParsed)::ExprParsed
+
+Maps Parser to respective Parsed type, and is also abstract super type of all Parsed types.
 
 Example
 ```
-Parsed(Parsers.Symbol) == Parsers.Symbol_Parsed
+ExprParsed(EP.Assignment) == EP.Assignment_Parsed
 ```
 """
 abstract type ExprParsed end
@@ -85,8 +92,8 @@ Base.convert(::Base.Type{Base.Expr}, parsed::ExprParsed) = to_expr(parsed)
 # Parsers
 # =======
 
-include("simple_parsers.jl")
-include("expr_parsers.jl")
-include("expr_parsers_meta.jl")
+include("expr_parsers_core.jl")
+include("expr_parsers_with_parsed.jl")
+include("expr_parsers_with_parsed_meta.jl")
 
 end # module

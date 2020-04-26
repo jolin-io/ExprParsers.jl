@@ -1,16 +1,14 @@
 # Simple Parsers
 # ==============
 
-abstract type SimpleParser end
-
-struct SatisfiesPredicate{Func} <: SimpleParser
+struct SatisfiesPredicate{Func} <: ExprParser
   predicate::Func
 end
 function parse_expr(parser::SatisfiesPredicate, expr)
   parser.predicate(expr) ? expr : throw(ParseError("Predicate $parser returned false on expr $expr."))
 end
 
-struct Isa{T} <: SimpleParser
+struct Isa{T} <: ExprParser
   # this way we cannot forget to instantiate the Type
   Isa(::Base.Type{T}) where T = new{T}()
 end
@@ -20,7 +18,7 @@ parse_expr(parser::Isa{T}, other::S) where {T, S} = throw(ParseError("Expected t
 const anything = Isa(Any)
 const anysymbol = Isa(Symbol)
 
-struct AnyOf{T} <: SimpleParser
+struct AnyOf{T} <: ExprParser
   several::T
   AnyOf(several...) = new{typeof(several)}(several)
 end
@@ -37,7 +35,7 @@ function parse_expr(parser::AnyOf, expr)
   throw(ParseError("could not parse any"))
 end
 
-struct AllOf{T} <: SimpleParser
+struct AllOf{T} <: ExprParser
   several::T
   AllOf(several...) = new{typeof(several)}(several)
 end

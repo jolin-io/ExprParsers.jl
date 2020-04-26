@@ -6,7 +6,7 @@ using ExprParsers
 # ================
 
 @testset "Block" begin
-  parser = EP.Block(EP.Symbol(), :b, EP.Expr(:tuple, EP.anything))
+  parser = EP.Block(EP.anysymbol, :b, EP.Expr(:tuple, EP.anything))
   @test_throws ParseError parse_expr(parser, quote
     5
     b
@@ -119,7 +119,7 @@ end
   # Expr should also support nested Parsers
   parser = EP.Expr(quote
     a = $(EP.Isa(Int))
-    b = $(EP.Symbol())
+    b = $(EP.anysymbol)
   end)
   parsed = parse_expr(parser, quote
     a = 4
@@ -131,7 +131,7 @@ end
     b = a
   end)
 
-  @test parsed.args.exprs[4].args[2] isa EP.Symbol_Parsed
+  @test parsed.args.exprs[4].args[2] isa Base.Symbol
 
   @test_throws ParseError parse_expr(parser, quote
     a = 4.0
@@ -268,16 +268,6 @@ end
   @test_throws ParseError parse_expr(parser, :(f(a, b)))
 end
 
-
-@testset "Symbol" begin
-  @test to_expr(parse_expr(EP.Symbol(), :hi)) == :hi
-  @test_throws ParseError parse_expr(EP.Symbol(), "ho")
-  @test to_expr(parse_expr(EP.Symbol(symbol = :thisone), :thisone)) == :thisone
-  @test_throws ParseError parse_expr(EP.Symbol(symbol = :thisone), :hi)
-
-  # All Parsers should be Closure operators
-  test_closure(EP.Symbol(), :test)
-end
 
 @testset "Type" begin
   parser = EP.Type()

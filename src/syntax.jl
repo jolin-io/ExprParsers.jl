@@ -10,7 +10,7 @@ end
 ```
 to
 ```
-StructEquality.@def_structequal Base.@kwdef struct MySymbol <: ExprParsers.ExprParser
+StructEquality.@def_structequal Base.@kwdef struct MySymbol <: ExprParsers.ExprParserWithParsed
   symbol = anything
 end
 StructEquality.@def_structequal Base.@kwdef mutable struct MySymbol_Parsed{T} <: ExprParsers.ExprParsed
@@ -46,7 +46,7 @@ macro exprparser(parser_struct_expr)
     "please ommit the inheritance notation, it will be provided by the macro")
 
   # add inheritance
-  parser_struct_expr.args[2] = :($(parser_struct_expr.args[2]) <: ExprParsers.ExprParser)
+  parser_struct_expr.args[2] = :($(parser_struct_expr.args[2]) <: ExprParsers.ExprParserWithParsed)
   parsed_struct_expr.args[2] = :($(parsed_struct_expr.args[2]) <: ExprParsers.ExprParsed)
 
   # TODO Parsed(..) calls also for typeparameters?
