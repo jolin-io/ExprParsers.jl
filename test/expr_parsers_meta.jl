@@ -28,7 +28,10 @@ end
   @test collect(values(indexed_parsed)) == [4, EP.Symbol_Parsed(:a)]
   @test indexed_parsed[:a] == 4
   @test indexed_parsed[:b].symbol == :a
-  # FUTURE: we may want to implement setindex! too
+
+  indexed_parsed[:a] = 5
+  @test indexed_parsed[:a] == 5
+  to_expr(indexed_parsed)  # looks good, but hard to test automatically
 
   @test_throws ParseError parse_expr(indexed_parser, quote
     a = 4.0

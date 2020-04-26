@@ -57,13 +57,24 @@ ExprParsed(::Base.Type{Indexed{T}}) where T = Indexed_Parsed{T}
 
 function parse_expr(parser::Indexed{T}, expr) where T
   parsed = parse_expr(parser.expr, expr)
-  mapping = Dict(k => get_object(nested_index, parsed) for (k, nested_index) in parser._paths)
+  mapping = Dict(k => get_object(parsed, nested_index) for (k, nested_index) in parser._paths)
   Indexed_Parsed{T}(mapping, parser._paths, parsed)
 end
 to_expr(parsed::Indexed_Parsed) = to_expr(parsed.expr)
 
+function Base.setindex!(parsed::Indexed_Parsed, value, key)
+  nested_index = parsed._paths[key]
+  # we need to update both the ._mapping as well as the .expr
+  parsed._mapping[key] = value
+  set_object!(parsed.expr, value, nested_index)
+end
 
 
+# Helper
+# ------
+
+# TODO these little helpers might be well replaced with some Lense Library
+# but for now they are enough
 
 """
   return list of keys/symbols to access a reference or nothing if no is found
@@ -85,7 +96,7 @@ function find_object(obj, nested::Union{Vector, Tuple, Dict})
 end
 find_object(obj, nested) = find_object(obj, Dict(key => getproperty(nested, key) for key in propertynames(nested)))
 
-function get_object(nested_index, nested, get_key)
+function get_object(nested, nested_index, get_key)
   if length(nested_index) == 0
      # return everything for empty index
     nested
@@ -95,9 +106,31 @@ function get_object(nested_index, nested, get_key)
     if length(nested_index) == 1
       subobject
     else
-      get_object(nested_index[2:end], subobject)
+      get_object(subobject, nested_index[2:end])
     end
   end
 end
-get_object(nested_index, nested::Union{Vector, Tuple, Dict}) = get_object(nested_index, nested, getindex)
-get_object(nested_index, nested) = get_object(nested_index, nested, getproperty)
+get_object(nested::Union{Vector, Tuple, Dict}, nested_index) = get_object(nested, nested_index, getindex)
+get_object(nested, nested_index) = get_object(nested, nested_index, getproperty)
+
+
+function set_object!(nested, value, nested_index, get_key, set_key!)
+  @assert length(nested_index) > 0 "we should never reach empty index in this recursion"
+  if length(nested_index) == 1
+    # use the last index to update the object
+    set_key!(nested, value, nested_index[1])
+  else
+    subobject = get_key(nested, nested_index[1])
+    newsubobject = set_object!(subobject, value, nested_index[2:end])
+    set_key!(nested, newsubobject, nested_index[1])
+  end
+  nested
+end
+function set_object!(nested::Union{Vector, Tuple, Dict}, value, nested_index)
+  set_object!(nested, value, nested_index, getindex, setindex!)
+  nested
+end
+function set_object!(nested, value, nested_index)
+  set_object!(nested, value, nested_index, getproperty, (object, value, key) -> setproperty!(object, key, value))
+  nested
+end
