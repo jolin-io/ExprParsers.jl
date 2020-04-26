@@ -18,7 +18,7 @@ parse_expr(parser::Isa{T}, expr::T) where T = expr
 parse_expr(parser::Isa{T}, other::S) where {T, S} = throw(ParseError("Expected type $T, got $other of type $S."))
 
 const anything = Isa(Any)
-
+const anysymbol = Isa(Symbol)
 
 struct AnyOf{T} <: SimpleParser
   several::T

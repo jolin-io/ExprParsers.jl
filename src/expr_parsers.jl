@@ -50,20 +50,6 @@ function to_expr(parsed::Expr_Parsed)
 end
 
 
-# Symbol
-# ------
-"""
-parses only symbols
-"""
-@exprparser struct Symbol
-  symbol = anything
-end
-
-parse_expr(parser::Symbol, symbol::Base.Symbol) = parse_expr(parser, symbol = symbol)
-parse_expr(parser::Symbol, other) = throw(ParseError("Symbol only parses Symbols, got $other"))
-to_expr(parsed::Symbol_Parsed) = to_expr(parsed.symbol)
-
-
 # Block
 # -----
 
@@ -85,45 +71,45 @@ end
   exprs
 end
 ExprParsed(::Base.Type{Block}) = Block_Parsed
-to_expr(bpp::Block_Parsed) = Base.Expr(:block, map(to_expr, bpp.exprs)...)
+to_expr(parsed::Block_Parsed) = Base.Expr(:block, map(to_expr, parsed.exprs)...)
 
-function parse_expr(bp::Block, expr::Base.Expr)
+function parse_expr(parser::Block, expr::Base.Expr)
   @passert expr.head == :block
-  parse_expr(bp, expr.args)
+  parse_expr(parser, expr.args)
 end
-function parse_expr(bp::Block, exprs::Union{Vector, Tuple})
-  parsed_expr = if bp.ignore_linenumbernodes
-    parseexpr_ignore_LineNumberNodes(bp.exprs, exprs)
+function parse_expr(parser::Block, exprs::Union{Vector, Tuple})
+  parsed_expr = if parser.ignore_linenumbernodes
+    parseexpr_ignore_LineNumberNodes(parser.exprs, exprs)
   else
-    parse_expr(bp.exprs, exprs)
+    parse_expr(parser.exprs, exprs)
   end
   Block_Parsed(parsed_expr)
 end
 
-parseexpr_ignore_LineNumberNodes(a, b) = parse_expr(a, b)
-function parseexpr_ignore_LineNumberNodes(args1::Union{Vector, Tuple, Iterator}, args2::Tuple)
-  parseexpr_ignore_LineNumberNodes(args1, collect(args2))
+parseexpr_ignore_LineNumberNodes(parser, expr) = parse_expr(parser, expr)
+function parseexpr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator}, exprs::Tuple)
+  parseexpr_ignore_LineNumberNodes(parsers, collect(exprs))
 end
-function parseexpr_ignore_LineNumberNodes(args1::Union{Vector, Tuple, Iterator}, args2::Vector)
-  args_parsed = similar(args2)
-  args1_filtered = Iterators.filter(x -> !isa(x, LineNumberNode), args1)
-  next1 = iterate(args1_filtered)
-  for (i, a2) in enumerate(args2)
-    if a2 isa LineNumberNode
-      args_parsed[i] = a2
+function parseexpr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator}, exprs::Vector)
+  exprs_parsed = similar(exprs)
+  parsers_filtered = Iterators.filter(x -> !isa(x, LineNumberNode), parsers)
+  next_parser = iterate(parsers_filtered)
+  for (i, expr) in enumerate(exprs)
+    if expr isa LineNumberNode
+      exprs_parsed[i] = expr
     else
-      @passert issomething(next1) "found element `$a2` in args2 $args2 without a match in args1 $args1."
-      a1, a1_state = next1
-      args_parsed[i] = parseexpr_ignore_LineNumberNodes(a1, a2)
-      next1 = iterate(args1_filtered, a1_state)
+      @passert issomething(next_parser) "Found expr `$expr` in exprs $exprs without a match in the parsers $parsers."
+      parser, state = next_parser
+      exprs_parsed[i] = parseexpr_ignore_LineNumberNodes(parser, expr)
+      next_parser = iterate(parsers_filtered, state)
     end
   end
-  @passert isnothing(next1) "While args2 $args2 is exhausted, there is still a rest $next1 in args1 $args1"
+  @passert isnothing(next_parser) "While exprs $exprs is exhausted, there is still a left over parser $(next_parser[1]) in the parsers $parsers."
   args_parsed
 end
-function parseexpr_ignore_LineNumberNodes(expr1::Expr, expr2::Expr)
-  @passert expr1.head == expr2.head
-  Base.Expr(expr1.head, parseexpr_ignore_LineNumberNodes(expr1.args, expr2.args)...)
+function parseexpr_ignore_LineNumberNodes(parser::Expr, expr::Expr)
+  @passert parser.head == expr.head
+  Base.Expr(parser.head, parseexpr_ignore_LineNumberNodes(parser.args, expr.args)...)
 end
 
 
@@ -141,12 +127,12 @@ parses:
   args = anything
   linenumber = Isa(LineNumberNode)
 end
-to_expr(mpp::Macro_Parsed) = Base.Expr(:macrocall, Base.Symbol("@", mpp.name), mpp.linenumber, mpp.args...)
-function parse_expr(mp::Macro, expr::Base.Expr)
+to_expr(parsed::Macro_Parsed) = Base.Expr(:macrocall, Base.Symbol("@", parsed.name), parsed.linenumber, parsed.args...)
+function parse_expr(parser::Macro, expr::Base.Expr)
   @passert expr.head == :macrocall
   name_with_at = expr.args[1]
   name_without_at = Base.Symbol(string(name_with_at)[2:end])
-  parse_expr(mp, name = name_without_at, args = expr.args[3:end], linenumber = expr.args[2])
+  parse_expr(parser, name = name_without_at, args = expr.args[3:end], linenumber = expr.args[2])
 end
 
 
@@ -163,10 +149,10 @@ left = right
   left = anything
   right = anything
 end
-to_expr(app::Assignment_Parsed) = :($(app.left) = $(app.right))
-function parse_expr(ap::Assignment, expr::Base.Expr)
+to_expr(parsed::Assignment_Parsed) = :($(parsed.left) = $(parsed.right))
+function parse_expr(parser::Assignment, expr::Base.Expr)
   @passert expr.head == :(=)  "assignment head not found"
-  parse_expr(ap, left = expr.args[1], right = expr.args[2])
+  parse_expr(parser, left = expr.args[1], right = expr.args[2])
 end
 
 # NestedDot
@@ -197,8 +183,8 @@ end
 _collect_nested_dots(expr::Base.Expr, _::Val) = [expr]
 _collect_nested_dots(any) = [any]
 
-to_expr(parsed::NestedDot_Parsed) = foldl(parsed.properties; init=parsed.base) do a, b
-  Base.Expr(:., a, QuoteNode(b))
+to_expr(parsed::NestedDot_Parsed) = foldl(parsed.properties; init=parsed.base) do expr, property
+  Base.Expr(:., expr, QuoteNode(property))
 end
 
 
@@ -458,7 +444,7 @@ TypeVar <: UpperBound
 LowerBound <: TypeVar <: UpperBound
 ```
 
-Note: Construct with typevar = Parsers.Symbol() to guarantee that only plain symbols can be used as type variable
+Note: Construct with `typevar = anysymbol` to guarantee that only plain symbols can be used as type variable
 """
 @exprparser struct TypeRange
   # naming is analog to Base.TypeVar
@@ -551,14 +537,14 @@ function parse_expr(parser::Arg, expr::Base.Symbol)
     default = nodefault)
 end
 
-const _arg_left_handside_parser = AnyOf(Symbol(), TypeAnnotation())
+const _arg_left_handside_parser = AnyOf(anysymbol, TypeAnnotation())
 function parse_expr(parser::Arg, expr::Base.Expr)
   if expr.head == :kw
     name, type = @match(parse_expr(_arg_left_handside_parser, expr.args[1])) do f
-      f(s::Symbol_Parsed) = s.symbol, Any
-      function f(a::TypeAnnotation_Parsed)
-        @passert issomething(a.name) "need variable name if default is given"
-        a.name, a.type
+      f(symbol::Base.Symbol) = symbol, Any
+      function f(parsed::TypeAnnotation_Parsed)
+        @passert issomething(parsed.name) "need variable name if default is given"
+        parsed.name, parsed.type
       end
     end
     parse_expr(parser, name = name, type = type, default = expr.args[2])
@@ -567,8 +553,8 @@ function parse_expr(parser::Arg, expr::Base.Expr)
     parse_expr(parser, name = expr.args[1], type = Vararg, default = nodefault)
   else
     name, type = @match(parse_expr(_arg_left_handside_parser, expr)) do f
-      f(s::Symbol_Parsed) = s.symbol, Any
-      f(a::TypeAnnotation_Parsed) = a.name, a.type
+      f(symbol::Base.Symbol) = symbol, Any
+      f(parsed::TypeAnnotation_Parsed) = parsed.name, parsed.type
     end
     # don't use the parser for ``default``
     Arg_Parsed(
