@@ -28,6 +28,6 @@ end
   include("expr_parsers_with_parsed.jl")
 end
 
-@testset "expr_parsers_with_parsed_meta" begin
-  include("expr_parsers_with_parsed_meta.jl")
+@testset "expr_parsers_meta" begin
+  include("expr_parsers_meta.jl")
 end

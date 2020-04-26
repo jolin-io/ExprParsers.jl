@@ -5,7 +5,7 @@
 @testset "Named" begin
   parser = EP.Named{:hi}(EP.anysymbol)
   parsed = parse_expr(parser, :symbol)
-  @test parsed isa EP.Named_Parsed{:hi}
+  @test parsed isa EP.Named{:hi, Base.Symbol}
   test_closure(parser, :symbol)
 end
 
@@ -22,6 +22,7 @@ end
   end
   test_closure(indexed_parser, expr)
   indexed_parsed = parse_expr(indexed_parser, expr)
+  @test indexed_parsed isa EP.Indexed{EP.Expr_Parsed}
   @test collect(keys(indexed_parsed)) == [:a; :b]
   @test collect(values(indexed_parsed)) == [4, :a]
   @test indexed_parsed[:a] == 4

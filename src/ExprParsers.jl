@@ -58,17 +58,17 @@ to_expr(a::Union{Vector, Tuple}) = map(to_expr, a)  # reverses also Iterator
 to_expr(a::Base.Expr) = Base.Expr(a.head, to_expr(a.args)...)
 
 """
-all parsers in the ``ExprParsers`` package inherit from this type
+All parsers in the ``ExprParsers`` package inherit from this type.
 """
 abstract type ExprParser end
 
 """
-subtype of ``ExprParser`` which indicates that this parser actually constructs a `ExprParsed` object when calling
+This is mainly for internal usage. Please use ``@exprparser`` instead for the public interface.
+
+Subtype of ``ExprParser`` which indicates that this parser actually constructs a `ExprParsed` object when calling
 ``parse_expr``.
 The resulting `ExprParsed` object is a struct with identical fields like the parser,
 where then the parsed values will be stored.
-
-This is mainly for internal usage. Please use ``@exprparser`` instead for the public interface.
 
 ``ExprParsed(parser::ExprParserWithParsed)`` will return the corresponding ``ExprParsed`` type.
 """
@@ -81,7 +81,7 @@ Maps Parser to respective Parsed type, and is also abstract super type of all Pa
 
 Example
 ```
-ExprParsed(EP.Assignment) == EP.Assignment_Parsed
+EP.ExprParsed(EP.Assignment) == EP.Assignment_Parsed
 ```
 """
 abstract type ExprParsed end
@@ -94,6 +94,6 @@ Base.convert(::Base.Type{Base.Expr}, parsed::ExprParsed) = to_expr(parsed)
 
 include("expr_parsers_core.jl")
 include("expr_parsers_with_parsed.jl")
-include("expr_parsers_with_parsed_meta.jl")
+include("expr_parsers_meta.jl")
 
 end # module
