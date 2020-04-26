@@ -84,6 +84,11 @@ Base.iterate(a, ::IterateStart) = Base.iterate(a)
 
 
 # possibility to use Iterators as elementwise Parsers of possibly unknown length
+"""
+    Itertor(some_iterable)
+
+Mark an iterable explicitly as an Iterator to add support for elementwise `parse_expr`.
+"""
 struct Iterator{T}
   iterator::T
 end
