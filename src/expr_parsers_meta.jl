@@ -17,11 +17,11 @@ ExprParsed(::Base.Type{Named}) = Named_Parsed
 ExprParsed(::Base.Type{Named{Name}}) where Name = Named_Parsed{Name}
 ExprParsed(::Base.Type{Named{Name, T}}) where {Name, T} = Named_Parsed{Name, T}
 
-function parse_expr(np::Named{Name, T}, expr) where {Name, T}
-  parsed = parse_expr(np.expr, expr)
+function parse_expr(parser::Named{Name, T}, expr) where {Name, T}
+  parsed = parse_expr(parser.expr, expr)
   Named_Parsed{Name, T}(parsed)
 end
-to_expr(npp::Named_Parsed) = to_expr(npp.expr)
+to_expr(parsed::Named_Parsed) = to_expr(parsed.expr)
 
 
 """
@@ -55,13 +55,12 @@ ProxyInterface.@dict Indexed_Parsed
 ExprParsed(::Base.Type{Indexed}) = Indexed_Parsed
 ExprParsed(::Base.Type{Indexed{T}}) where T = Indexed_Parsed{T}
 
-function parse_expr(ip::Indexed{T}, expr) where T
-  parsed = parse_expr(ip.expr, expr)
-  mapping = Dict(k => get_object(nested_index, parsed) for (k, nested_index) in ip._paths)
-  Indexed_Parsed{T}(mapping, ip._paths, parsed)
+function parse_expr(parser::Indexed{T}, expr) where T
+  parsed = parse_expr(parser.expr, expr)
+  mapping = Dict(k => get_object(nested_index, parsed) for (k, nested_index) in parser._paths)
+  Indexed_Parsed{T}(mapping, parser._paths, parsed)
 end
-to_expr(ipp::Indexed_Parsed) = to_expr(ipp.expr)
-
+to_expr(parsed::Indexed_Parsed) = to_expr(parsed.expr)
 
 
 

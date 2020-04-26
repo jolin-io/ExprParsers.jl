@@ -40,12 +40,12 @@ function Expr(expr::Base.Expr; ignore_linenumbernodes=true)
     Expr(expr.head, expr.args)
   end
 end
-parse_expr(p::Expr, expr::Base.Expr) = parse_expr(p, head = expr.head, args = expr.args)
-function to_expr(pp::Expr_Parsed)
-  if pp.args isa Block_Parsed
-    Base.Expr(to_expr(pp.head), to_expr(pp.args.exprs)...)
+parse_expr(parser::Expr, expr::Base.Expr) = parse_expr(parser, head = expr.head, args = expr.args)
+function to_expr(parsed::Expr_Parsed)
+  if parsed.args isa Block_Parsed
+    Base.Expr(to_expr(parsed.head), to_expr(parsed.args.exprs)...)
   else
-    Base.Expr(to_expr(pp.head), to_expr(pp.args)...)
+    Base.Expr(to_expr(parsed.head), to_expr(parsed.args)...)
   end
 end
 
@@ -59,9 +59,9 @@ parses only symbols
   symbol = anything
 end
 
-parse_expr(p::Symbol, symbol::Base.Symbol) = parse_expr(p, symbol = symbol)
-parse_expr(p::Symbol, other) = throw(ParseError("Symbol only parses Symbols, got $other"))
-to_expr(pp::Symbol_Parsed) = to_expr(pp.symbol)
+parse_expr(parser::Symbol, symbol::Base.Symbol) = parse_expr(parser, symbol = symbol)
+parse_expr(parser::Symbol, other) = throw(ParseError("Symbol only parses Symbols, got $other"))
+to_expr(parsed::Symbol_Parsed) = to_expr(parsed.symbol)
 
 
 # Block
@@ -183,10 +183,10 @@ fun(T{:hi}).b.c.d.e.f
   base = anything
   properties = anything
 end
-function parse_expr(ndp::NestedDot, expr::Base.Expr)
+function parse_expr(parser::NestedDot, expr::Base.Expr)
   @passert expr.head == :.
   exprs = _collect_nested_dots(expr)
-  parse_expr(ndp, base = exprs[1], properties = exprs[2:end])
+  parse_expr(parser, base = exprs[1], properties = exprs[2:end])
 end
 _collect_nested_dots(expr::Base.Expr) = _collect_nested_dots(expr, Val{expr.head}())
 function _collect_nested_dots(expr::Base.Expr, ::Val{:.})
@@ -197,7 +197,7 @@ end
 _collect_nested_dots(expr::Base.Expr, _::Val) = [expr]
 _collect_nested_dots(any) = [any]
 
-to_expr(ndpp::NestedDot_Parsed) = foldl(ndpp.properties; init=ndpp.base) do a, b
+to_expr(parsed::NestedDot_Parsed) = foldl(parsed.properties; init=parsed.base) do a, b
   Base.Expr(:., a, QuoteNode(b))
 end
 
@@ -217,22 +217,22 @@ a{b, c}
   curlies = anything
 end
 
-parse_expr(p::Reference, e::Base.Symbol) = parse_expr(p, name = e, curlies = [])
-function parse_expr(p::Reference, e::Base.Expr)
-  if e.head == :curly
-    parse_expr(p, name = e.args[1], curlies = e.args[2:end])
-  elseif e.head == :.
-    parse_expr(p, name = e, curlies = [])
+parse_expr(parser::Reference, expr::Base.Symbol) = parse_expr(parser, name = expr, curlies = [])
+function parse_expr(parser::Reference, expr::Base.Expr)
+  if expr.head == :curly
+    parse_expr(parser, name = expr.args[1], curlies = expr.args[2:end])
+  elseif expr.head == :.
+    parse_expr(parser, name = expr, curlies = [])
   else
-    throw(ParseError("Cannot parse expression as reference: $e"))
+    throw(ParseError("Cannot parse expression as reference: $expr"))
   end
 end
 
-function to_expr(pp::Reference_Parsed)
-  if isempty(pp.curlies)
-    to_expr(pp.name)
+function to_expr(parsed::Reference_Parsed)
+  if isempty(parsed.curlies)
+    to_expr(parsed.name)
   else
-    :( $(to_expr(pp.name)){$(to_expr(pp.curlies)...)} )
+    :( $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)} )
   end
 end
 
@@ -258,29 +258,29 @@ a{b, c}(d, e)
   kwargs = anything
 end
 
-function parse_expr(p::Call, e::Base.Expr)
-  @passert e.head == :call
-  called = parse_expr(Reference(), e.args[1])
-  args, kwargs = if _is_kws(e.args[2])
-    e.args[3:end], e.args[2].args
+function parse_expr(parser::Call, expr::Base.Expr)
+  @passert expr.head == :call
+  called = parse_expr(Reference(), expr.args[1])
+  args, kwargs = if _is_kws(expr.args[2])
+    expr.args[3:end], expr.args[2].args
   else
-    e.args[2:end], []
+    expr.args[2:end], []
   end
-  parse_expr(p, name = called.name, curlies = called.curlies, args = args, kwargs = kwargs)
+  parse_expr(parser, name = called.name, curlies = called.curlies, args = args, kwargs = kwargs)
 end
 
-to_expr(pp::Call_Parsed) = toAST_Call(pp, Val{nonempty(pp.curlies)}(), Val{nonempty(pp.kwargs)}())
-toAST_Call(pp, iscurlies::True, iswheres::True) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}($(to_expr(pp.args)...),;$(to_expr(pp.kwargs)...))
+to_expr(parsed::Call_Parsed) = toAST_Call(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}())
+toAST_Call(parsed, iscurlies::True, iswheres::True) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),;$(to_expr(parsed.kwargs)...))
 )
-toAST_Call(pp, iscurlies::True, iswheres::False) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}($(to_expr(pp.args)...),)
+toAST_Call(parsed, iscurlies::True, iswheres::False) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),)
 )
-toAST_Call(pp, iscurlies::False, iswheres::True) = :(
-  $(to_expr(pp.name))($(to_expr(pp.args)...),;$(to_expr(pp.kwargs)...))
+toAST_Call(parsed, iscurlies::False, iswheres::True) = :(
+  $(to_expr(parsed.name))($(to_expr(parsed.args)...),;$(to_expr(parsed.kwargs)...))
 )
-toAST_Call(pp, iscurlies::False, iswheres::False) = :(
-  $(to_expr(pp.name))($(to_expr(pp.args)...),)
+toAST_Call(parsed, iscurlies::False, iswheres::False) = :(
+  $(to_expr(parsed.name))($(to_expr(parsed.args)...),)
 )
 
 
@@ -303,7 +303,7 @@ a(b::B, c) where B
   wheres = anything
 end
 
-function parse_expr(p::Signature, expr::Base.Expr)
+function parse_expr(parser::Signature, expr::Base.Expr)
   @passert expr.head in (:where, :call, :tuple)
   # we don't reuse ParsedCallExpr because functions-signatures can actually be anonymous
   call, wheres = split_where(expr)
@@ -321,46 +321,46 @@ function parse_expr(p::Signature, expr::Base.Expr)
     parsed = parse_expr(Call(), call)
     parsed.name, parsed.curlies, parsed.args, parsed.kwargs
   end
-  parse_expr(p, name = name, curlies = curlies, args = args, kwargs = kwargs, wheres = wheres)
+  parse_expr(parser, name = name, curlies = curlies, args = args, kwargs = kwargs, wheres = wheres)
 end
 
-to_expr(pp::Signature_Parsed) = _toAST_Signature(pp, pp.name, Val{nonempty(pp.curlies)}(), Val{nonempty(pp.kwargs)}(), Val{nonempty(pp.wheres)}())
-_toAST_Signature(pp, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. pp.curlies = $(pp.curlies)")
-_toAST_Signature(pp, ::Nothing, ::False, iskwargs::False, iswheres::False) = :(
-  ($(to_expr(pp.args)...),)
+to_expr(parsed::Signature_Parsed) = _toAST_Signature(parsed, parsed.name, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}(), Val{nonempty(parsed.wheres)}())
+_toAST_Signature(parsed, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
+_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::False) = :(
+  ($(to_expr(parsed.args)...),)
 )
-_toAST_Signature(pp, ::Nothing, ::False, iskwargs::True, iswheres::False) = :(
-  ($(to_expr(pp.args)...), ; $(to_expr(pp.kwargs)...))
+_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::True, iswheres::False) = :(
+  ($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...))
 )
-_toAST_Signature(pp, ::Nothing, ::False, iskwargs::False, iswheres::True) = :(
-  ($(to_expr(pp.args)...),) where {$(to_expr(pp.wheres)...)}
+_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::True) = :(
+  ($(to_expr(parsed.args)...),) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(pp, ::Nothing, ::False, iskwargs::True, iswheres::True) = :(
-  ($(to_expr(pp.args)...),; $(to_expr(pp.kwargs)...)) where {$(to_expr(pp.wheres)...)}
+_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::True, iswheres::True) = :(
+  ($(to_expr(parsed.args)...),; $(to_expr(parsed.kwargs)...)) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(pp, name, iscurlies::True, iskwargs::True, iswheres::True) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}($(to_expr(pp.args)...), ; $(to_expr(pp.kwargs)...)) where {$(to_expr(pp.wheres)...)}
+_toAST_Signature(parsed, name, iscurlies::True, iskwargs::True, iswheres::True) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...)) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(pp, name, iscurlies::True, iskwargs::True, iswheres::False) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}($(to_expr(pp.args)...), ; $(to_expr(pp.kwargs)...))
+_toAST_Signature(parsed, name, iscurlies::True, iskwargs::True, iswheres::False) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...))
 )
-_toAST_Signature(pp, name, iscurlies::True, iskwargs::False, iswheres::True) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}($(to_expr(pp.args)...),) where {$(to_expr(pp.wheres)...)}
+_toAST_Signature(parsed, name, iscurlies::True, iskwargs::False, iswheres::True) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(pp, name, iscurlies::True, iskwargs::False, iswheres::False) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}($(to_expr(pp.args)...),)
+_toAST_Signature(parsed, name, iscurlies::True, iskwargs::False, iswheres::False) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),)
 )
-_toAST_Signature(pp, name, iscurlies::False, iskwargs::True, iswheres::True) = :(
-  $(to_expr(pp.name))($(to_expr(pp.args)...), ; $(to_expr(pp.kwargs)...)) where {$(to_expr(pp.wheres)...)}
+_toAST_Signature(parsed, name, iscurlies::False, iskwargs::True, iswheres::True) = :(
+  $(to_expr(parsed.name))($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...)) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(pp, name, iscurlies::False, iskwargs::True, iswheres::False) = :(
-  $(to_expr(pp.name))($(to_expr(pp.args)...), ; $(to_expr(pp.kwargs)...))
+_toAST_Signature(parsed, name, iscurlies::False, iskwargs::True, iswheres::False) = :(
+  $(to_expr(parsed.name))($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...))
 )
-_toAST_Signature(pp, name, iscurlies::False, iskwargs::False, iswheres::True) = :(
-  $(to_expr(pp.name))($(to_expr(pp.args)...),) where {$(to_expr(pp.wheres)...)}
+_toAST_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::True) = :(
+  $(to_expr(parsed.name))($(to_expr(parsed.args)...),) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(pp, name, iscurlies::False, iskwargs::False, iswheres::False) = :(
-  $(to_expr(pp.name))($(to_expr(pp.args)...),)
+_toAST_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::False) = :(
+  $(to_expr(parsed.name))($(to_expr(parsed.args)...),)
 )
 
 # Function
@@ -384,13 +384,13 @@ a(b, c) = d
   body = anything
 end
 
-function parse_expr(p::Function, expr::Base.Expr)
+function parse_expr(parser::Function, expr::Base.Expr)
   @passert expr.head in (:function, :(=))
   @passert length(expr.args) == 2
   body = expr.args[2]
 
   signature = parse_expr(Signature(), expr.args[1])
-  parse_expr(p,
+  parse_expr(parser,
     name = signature.name,
     curlies = signature.curlies,
     args = signature.args,
@@ -399,14 +399,14 @@ function parse_expr(p::Function, expr::Base.Expr)
     body = body)
 end
 
-to_expr(pp::Function_Parsed) = Base.Expr(:function, to_expr(Signature_Parsed(pp)), to_expr(pp.body))
+to_expr(parsed::Function_Parsed) = Base.Expr(:function, to_expr(Signature_Parsed(parsed)), to_expr(parsed.body))
 
-Signature_Parsed(pp::Function_Parsed) = Signature_Parsed(
-  name = pp.name,
-  curlies = pp.curlies,
-  args = pp.args,
-  kwargs = pp.kwargs,
-  wheres = pp.wheres,
+Signature_Parsed(parsed::Function_Parsed) = Signature_Parsed(
+  name = parsed.name,
+  curlies = parsed.curlies,
+  args = parsed.args,
+  kwargs = parsed.kwargs,
+  wheres = parsed.wheres,
 )
 
 # Type
@@ -426,25 +426,25 @@ a{d} where d
   wheres = anything
 end
 
-parse_expr(p::Type, e::Base.Symbol) = parse_expr(p, name = e, curlies = [], wheres = [])
-parse_expr(p::Type, e::Base.Type) = parse_expr(p, name = e, curlies = [], wheres = [])
-function parse_expr(p::Type, e::Base.Expr)
-  e′, wheres = split_where(e)
-  ref = parse_expr(Reference(), e′)
-  parse_expr(p, name = ref.name, curlies = ref.curlies, wheres = wheres)
+parse_expr(parser::Type, expr::Base.Symbol) = parse_expr(parser, name = expr, curlies = [], wheres = [])
+parse_expr(parser::Type, expr::Base.Type) = parse_expr(parser, name = expr, curlies = [], wheres = [])
+function parse_expr(parser::Type, expr::Base.Expr)
+  expr′, wheres = split_where(expr)
+  ref = parse_expr(Reference(), expr′)
+  parse_expr(parser, name = ref.name, curlies = ref.curlies, wheres = wheres)
 end
 
-to_expr(pp::Type_Parsed) = toAST_Type(pp, Val{nonempty(pp.curlies)}(), Val{nonempty(pp.wheres)}())
-toAST_Type(pp, curlies::True, wheres::True) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)} where {$(to_expr(pp.wheres)...)}
+to_expr(parsed::Type_Parsed) = toAST_Type(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.wheres)}())
+toAST_Type(parsed, curlies::True, wheres::True) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)} where {$(to_expr(parsed.wheres)...)}
 )
-toAST_Type(pp, curlies::True, wheres::False) = :(
-  $(to_expr(pp.name)){$(to_expr(pp.curlies)...)}
+toAST_Type(parsed, curlies::True, wheres::False) = :(
+  $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}
 )
-toAST_Type(pp, curlies::False, wheres::True) = :(
-  $(to_expr(pp.name)) where {$(to_expr(pp.wheres))}
+toAST_Type(parsed, curlies::False, wheres::True) = :(
+  $(to_expr(parsed.name)) where {$(to_expr(parsed.wheres))}
 )
-toAST_Type(pp, curlies::False, wheres::False) = to_expr(pp.name)
+toAST_Type(parsed, curlies::False, wheres::False) = to_expr(parsed.name)
 
 
 # TypeRange
@@ -467,19 +467,19 @@ Note: Construct with typevar = Parsers.Symbol() to guarantee that only plain sym
   ub = anything
 end
 
-function parse_expr(trp::TypeRange, expr::Base.Expr)
+function parse_expr(parser::TypeRange, expr::Base.Expr)
   if expr.head == :>:
-    parse_expr(trp, lb = expr.args[2], name = expr.args[1], ub = Any)
+    parse_expr(parser, lb = expr.args[2], name = expr.args[1], ub = Any)
   elseif expr.head == :<:
-    parse_expr(trp, lb = Union{}, name = expr.args[1], ub = expr.args[2])
+    parse_expr(parser, lb = Union{}, name = expr.args[1], ub = expr.args[2])
   elseif expr.head == :comparison && length(expr.args) == 5 && expr.args[2] == expr.args[4] == :<:
-    parse_expr(trp, lb = expr.args[1], name = expr.args[3], ub = expr.args[5])
+    parse_expr(parser, lb = expr.args[1], name = expr.args[3], ub = expr.args[5])
   else
     throw(ParseError("TypeRange only parses <:, >: constructs, but got: $expr"))
   end
 end
 
-to_expr(trpp::TypeRange_Parsed) = toAST_TypeRange(trpp.lb, trpp.name, trpp.ub)
+to_expr(parsed::TypeRange_Parsed) = toAST_TypeRange(parsed.lb, parsed.name, parsed.ub)
 toAST_TypeRange(::Base.Type{Union{}}, name, ::Base.Type{Any}) = name
 toAST_TypeRange(lb, name, ::Base.Type{Any}) = :($name >: $lb)
 toAST_TypeRange(::Base.Type{Union{}}, name, ub) = :($name <: $ub)
@@ -502,20 +502,20 @@ a::B
   type = anything
 end
 
-function parse_expr(p::TypeAnnotation, e::Base.Expr)
-  @passert e.head == :(::)
-  @passert length(e.args) <= 2
-  if length(e.args) == 1
-    parse_expr(p, name = nothing, type = e.args[1])
+function parse_expr(parser::TypeAnnotation, expr::Base.Expr)
+  @passert expr.head == :(::)
+  @passert length(expr.args) <= 2
+  if length(expr.args) == 1
+    parse_expr(parser, name = nothing, type = expr.args[1])
   else
-    parse_expr(p, name = e.args[1], type = e.args[2])
+    parse_expr(parser, name = expr.args[1], type = expr.args[2])
   end
 end
-function to_expr(pp::TypeAnnotation_Parsed)
-  if isnothing(pp.name)
-    :(::$(to_expr(pp.type)))
+function to_expr(parsed::TypeAnnotation_Parsed)
+  if isnothing(parsed.name)
+    :(::$(to_expr(parsed.type)))
   else
-    :($(to_expr(pp.name))::$(to_expr(pp.type)))
+    :($(to_expr(parsed.name))::$(to_expr(parsed.type)))
   end
 end
 
@@ -543,16 +543,16 @@ a::B = c
   default = anything
 end
 
-function parse_expr(p::Arg, e::Base.Symbol)
+function parse_expr(parser::Arg, expr::Base.Symbol)
   # don't use the parser for ``default``
   Arg_Parsed(
-    name = parse_expr(p.name, e),
-    type = parse_expr(p.type, Any),
+    name = parse_expr(parser.name, expr),
+    type = parse_expr(parser.type, Any),
     default = nodefault)
 end
 
 const _arg_left_handside_parser = AnyOf(Symbol(), TypeAnnotation())
-function parse_expr(p::Arg, expr::Base.Expr)
+function parse_expr(parser::Arg, expr::Base.Expr)
   if expr.head == :kw
     name, type = @match(parse_expr(_arg_left_handside_parser, expr.args[1])) do f
       f(s::Symbol_Parsed) = s.symbol, Any
@@ -561,10 +561,10 @@ function parse_expr(p::Arg, expr::Base.Expr)
         a.name, a.type
       end
     end
-    parse_expr(p, name = name, type = type, default = expr.args[2])
+    parse_expr(parser, name = name, type = type, default = expr.args[2])
   elseif expr.head == :...
     # Vararg is not a valid Type https://github.com/JuliaLang/julia/issues/30995
-    parse_expr(p, name = expr.args[1], type = Vararg, default = nodefault)
+    parse_expr(parser, name = expr.args[1], type = Vararg, default = nodefault)
   else
     name, type = @match(parse_expr(_arg_left_handside_parser, expr)) do f
       f(s::Symbol_Parsed) = s.symbol, Any
@@ -572,13 +572,13 @@ function parse_expr(p::Arg, expr::Base.Expr)
     end
     # don't use the parser for ``default``
     Arg_Parsed(
-      name = parse_expr(p.name, name),
-      type = parse_expr(p.type, type),
+      name = parse_expr(parser.name, name),
+      type = parse_expr(parser.type, type),
       default = nodefault)
   end
 end
 
-to_expr(pp::Arg_Parsed) = _toAST_Arg(pp.name, pp.type, pp.default)
+to_expr(parsed::Arg_Parsed) = _toAST_Arg(parsed.name, parsed.type, parsed.default)
 _toAST_Arg(::Nothing, type, ::NoDefault) = :(::$(to_expr(type)))
 _toAST_Arg(name, ::Base.Type{Any}, ::NoDefault) = to_expr(name)
 function _toAST_Arg(name, type, ::NoDefault)
