@@ -1,8 +1,10 @@
 module Utils
 export nonempty, unwrap_where, rewrap_where, split_where, issomething, change_name!,
   get_name, find_object, get_object,
-  @ifsomething, iterate_start, IterateStart,
+  @ifsomething, iterate_start, IterateStart, Iterator,
   True, False
+
+using ProxyInterface
 
 const True = Val{true}
 const False = Val{false}
@@ -58,44 +60,6 @@ issomething(::Nothing) = false
 issomething(::Any) = true
 
 """
-  return list of keys/symbols to access a reference or nothing if no is found
-"""
-function find_object(obj, nested::Union{Vector, Tuple, Dict})
-  # first check whether the object is any of the elements itself
-  i = findfirst(nested) do x
-    obj === x
-  end
-  issomething(i) && return i
-
-  # recurse if nothing found
-  # return first non-nothing value
-  for (k, v) in zip(keys(nested), values(nested))
-    subkeys = find_object(obj, v)
-    issomething(subkeys) && return [k; subkeys]
-  end
-  return nothing
-end
-find_object(obj, nested) = find_object(obj, Dict(key => getproperty(nested, key) for key in propertynames(nested)))
-
-function get_object(nested_index, nested, get_key)
-  if length(nested_index) == 0
-     # return everything for empty index
-    nested
-  else
-    subobject = get_key(nested, nested_index[1])
-
-    if length(nested_index) == 1
-      subobject
-    else
-      get_object(nested_index[2:end], subobject)
-    end
-  end
-end
-get_object(nested_index, nested::Union{Vector, Tuple, Dict}) = get_object(nested_index, nested, getindex)
-get_object(nested_index, nested) = get_object(nested_index, nested, getproperty)
-
-
-"""
     IterTools.@ifsomething expr
 If `expr` evaluates to `nothing`, equivalent to `return nothing`, otherwise the macro
 evaluates to the value of `expr`. Not exported, useful for implementing iterators.
@@ -117,5 +81,14 @@ end
 struct IterateStart end
 const iterate_start = IterateStart()
 Base.iterate(a, ::IterateStart) = Base.iterate(a)
+
+
+# possibility to use Iterators as elementwise Parsers of possibly unknown length
+struct Iterator{T}
+  iterator::T
+end
+ProxyInterface.iterator(i::Iterator) = i.iterator
+ProxyInterface.iterator(::Base.Type{Iterator{T}}) where T = T
+ProxyInterface.@iterator Iterator
 
 end  # module

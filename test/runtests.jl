@@ -1,10 +1,14 @@
 using Test
-using ASTParser
+using ExprParsers
 
-@testset "Matcher" begin
-  include("Matchers.jl")
+@testset "syntax" begin
+  include("syntax.jl")
 end
 
-@testset "Parsers" begin
-  include("Parsers/Parsers.jl")
+@testset "simple_parsers" begin
+  include("simple_parsers.jl")
+end
+
+@testset "expr_parsers" begin
+  include("expr_parsers.jl")
 end
