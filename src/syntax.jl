@@ -1,6 +1,6 @@
 using StructEquality
 
-const suffix = "_Parsed"
+const SUFFIX = "_Parsed"
 """
 transforms
 ```
@@ -39,7 +39,7 @@ macro exprparser(parser_struct_expr)
   @assert parser_struct_expr.head == :struct "expecting struct"
   @assert parser_struct_expr.args[1] == false "expecting immutable struct as parser"
   parser_struct_name::Base.Symbol = _get_struct_name(parser_struct_expr)
-  parsed_struct_name = Base.Symbol(parser_struct_name, suffix)
+  parsed_struct_name = Base.Symbol(parser_struct_name, SUFFIX)
 
   parsed_struct_expr = _parsed_struct_from_parser_struct(parser_struct_expr, parsed_struct_name)
   @assert(!isa(parser_struct_expr.args[2], Base.Expr) || parser_struct_expr.args[2].head != :(<:),
@@ -67,7 +67,7 @@ _get_struct_name(symbol::Base.Symbol) = symbol
 
 """
 - makes it mutable
-- adds suffix to struct name
+- adds SUFFIX to struct name
 - deletes all default values
 """
 function _parsed_struct_from_parser_struct(struct_expr::Base.Expr, newname)

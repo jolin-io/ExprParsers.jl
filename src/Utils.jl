@@ -39,7 +39,7 @@ end
 """
 Example
 ```
-julia> ASTParser.split_where(:(f(a::A) where {C, Y <: A} where B where A ))
+julia> ExprParsers.Utils.split_where(:(f(a::A) where {C, Y <: A} where B where A ))
 (:(f(a::A)), Any[:A, :B, :C, :(Y <: A)])
 ```
 """

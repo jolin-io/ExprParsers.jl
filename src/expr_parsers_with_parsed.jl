@@ -17,16 +17,17 @@ function parse_expr(parser::ExprParserWithParsed, any)
   throw(ParseError("$(typeof(parser)) has no clause defined to capture Type '$(typeof(any))'. Got: $any"))
 end
 
-function Base.show(io::IO, exc::Union{ExprParserWithParsed, ExprParsed})
-  # TODO continue here - write a nice show so that fields are shown correctly instead of positions
-  println(io, "Failure{$T, $E}")
-  println(io, exc.exception)
-  for (exc′, bt′) in exc.stack
-    showerror(io, exc′, bt′)
-    println(io)
+function Base.show(io::IO, obj::Union{ExprParserWithParsed, ExprParsed})
+  type_name = typeof(obj).name.name
+  println(io, "EP.$type_name(")
+  field_lengths = length.(string.(fieldnames(typeof(obj))))
+  max_field_length = maximum(field_lengths)
+  for (field, field_length) in zip(fieldnames(typeof(obj)), field_lengths)
+    filler = join(fill(" ", max_field_length - field_length))
+    println(io, "  $field $filler= $(repr(getproperty(obj, field)))")
   end
+  println(io, ")")
 end
-
 
 # ExprParsers
 # ===========
@@ -90,18 +91,18 @@ function parse_expr(parser::Block, expr::Base.Expr)
 end
 function parse_expr(parser::Block, exprs::Union{Vector, Tuple})
   parsed_expr = if parser.ignore_linenumbernodes
-    parseexpr_ignore_LineNumberNodes(parser.exprs, exprs)
+    parse_expr_ignore_LineNumberNodes(parser.exprs, exprs)
   else
     parse_expr(parser.exprs, exprs)
   end
   Block_Parsed(parsed_expr)
 end
 
-parseexpr_ignore_LineNumberNodes(parser, expr) = parse_expr(parser, expr)
-function parseexpr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator}, exprs::Tuple)
-  parseexpr_ignore_LineNumberNodes(parsers, collect(exprs))
+parse_expr_ignore_LineNumberNodes(parser, expr) = parse_expr(parser, expr)
+function parse_expr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator}, exprs::Tuple)
+  parse_expr_ignore_LineNumberNodes(parsers, collect(exprs))
 end
-function parseexpr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator}, exprs::Vector)
+function parse_expr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator}, exprs::Vector)
   exprs_parsed = similar(exprs)
   parsers_filtered = Iterators.filter(x -> !isa(x, LineNumberNode), parsers)
   next_parser = iterate(parsers_filtered)
@@ -111,16 +112,16 @@ function parseexpr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterator
     else
       @passert issomething(next_parser) "Found expr `$expr` in exprs $exprs without a match in the parsers $parsers."
       parser, state = next_parser
-      exprs_parsed[i] = parseexpr_ignore_LineNumberNodes(parser, expr)
+      exprs_parsed[i] = parse_expr_ignore_LineNumberNodes(parser, expr)
       next_parser = iterate(parsers_filtered, state)
     end
   end
   @passert isnothing(next_parser) "While exprs $exprs is exhausted, there is still a left over parser $(next_parser[1]) in the parsers $parsers."
   exprs_parsed
 end
-function parseexpr_ignore_LineNumberNodes(parser::Expr, expr::Expr)
+function parse_expr_ignore_LineNumberNodes(parser::Expr, expr::Expr)
   @passert parser.head == expr.head
-  Base.Expr(parser.head, parseexpr_ignore_LineNumberNodes(parser.args, expr.args)...)
+  Base.Expr(parser.head, parse_expr_ignore_LineNumberNodes(parser.args, expr.args)...)
 end
 
 
@@ -266,17 +267,17 @@ function parse_expr(parser::Call, expr::Base.Expr)
   parse_expr(parser, name = called.name, curlies = called.curlies, args = args, kwargs = kwargs)
 end
 
-to_expr(parsed::Call_Parsed) = toAST_Call(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}())
-toAST_Call(parsed, iscurlies::True, iswheres::True) = :(
+to_expr(parsed::Call_Parsed) = _to_expr_Call(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}())
+_to_expr_Call(parsed, iscurlies::True, iswheres::True) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),;$(to_expr(parsed.kwargs)...))
 )
-toAST_Call(parsed, iscurlies::True, iswheres::False) = :(
+_to_expr_Call(parsed, iscurlies::True, iswheres::False) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),)
 )
-toAST_Call(parsed, iscurlies::False, iswheres::True) = :(
+_to_expr_Call(parsed, iscurlies::False, iswheres::True) = :(
   $(to_expr(parsed.name))($(to_expr(parsed.args)...),;$(to_expr(parsed.kwargs)...))
 )
-toAST_Call(parsed, iscurlies::False, iswheres::False) = :(
+_to_expr_Call(parsed, iscurlies::False, iswheres::False) = :(
   $(to_expr(parsed.name))($(to_expr(parsed.args)...),)
 )
 
@@ -321,42 +322,42 @@ function parse_expr(parser::Signature, expr::Base.Expr)
   parse_expr(parser, name = name, curlies = curlies, args = args, kwargs = kwargs, wheres = wheres)
 end
 
-to_expr(parsed::Signature_Parsed) = _toAST_Signature(parsed, parsed.name, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}(), Val{nonempty(parsed.wheres)}())
-_toAST_Signature(parsed, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
-_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::False) = :(
+to_expr(parsed::Signature_Parsed) = _to_expr_Signature(parsed, parsed.name, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}(), Val{nonempty(parsed.wheres)}())
+_to_expr_Signature(parsed, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
+_to_expr_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::False) = :(
   ($(to_expr(parsed.args)...),)
 )
-_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::True, iswheres::False) = :(
+_to_expr_Signature(parsed, ::Nothing, ::False, iskwargs::True, iswheres::False) = :(
   ($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...))
 )
-_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::True) = :(
+_to_expr_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::True) = :(
   ($(to_expr(parsed.args)...),) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(parsed, ::Nothing, ::False, iskwargs::True, iswheres::True) = :(
+_to_expr_Signature(parsed, ::Nothing, ::False, iskwargs::True, iswheres::True) = :(
   ($(to_expr(parsed.args)...),; $(to_expr(parsed.kwargs)...)) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(parsed, name, iscurlies::True, iskwargs::True, iswheres::True) = :(
+_to_expr_Signature(parsed, name, iscurlies::True, iskwargs::True, iswheres::True) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...)) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(parsed, name, iscurlies::True, iskwargs::True, iswheres::False) = :(
+_to_expr_Signature(parsed, name, iscurlies::True, iskwargs::True, iswheres::False) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...))
 )
-_toAST_Signature(parsed, name, iscurlies::True, iskwargs::False, iswheres::True) = :(
+_to_expr_Signature(parsed, name, iscurlies::True, iskwargs::False, iswheres::True) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(parsed, name, iscurlies::True, iskwargs::False, iswheres::False) = :(
+_to_expr_Signature(parsed, name, iscurlies::True, iskwargs::False, iswheres::False) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}($(to_expr(parsed.args)...),)
 )
-_toAST_Signature(parsed, name, iscurlies::False, iskwargs::True, iswheres::True) = :(
+_to_expr_Signature(parsed, name, iscurlies::False, iskwargs::True, iswheres::True) = :(
   $(to_expr(parsed.name))($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...)) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(parsed, name, iscurlies::False, iskwargs::True, iswheres::False) = :(
+_to_expr_Signature(parsed, name, iscurlies::False, iskwargs::True, iswheres::False) = :(
   $(to_expr(parsed.name))($(to_expr(parsed.args)...), ; $(to_expr(parsed.kwargs)...))
 )
-_toAST_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::True) = :(
+_to_expr_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::True) = :(
   $(to_expr(parsed.name))($(to_expr(parsed.args)...),) where {$(to_expr(parsed.wheres)...)}
 )
-_toAST_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::False) = :(
+_to_expr_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::False) = :(
   $(to_expr(parsed.name))($(to_expr(parsed.args)...),)
 )
 
@@ -431,17 +432,17 @@ function parse_expr(parser::Type, expr::Base.Expr)
   parse_expr(parser, name = ref.name, curlies = ref.curlies, wheres = wheres)
 end
 
-to_expr(parsed::Type_Parsed) = toAST_Type(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.wheres)}())
-toAST_Type(parsed, curlies::True, wheres::True) = :(
+to_expr(parsed::Type_Parsed) = _to_expr_Type(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.wheres)}())
+_to_expr_Type(parsed, curlies::True, wheres::True) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)} where {$(to_expr(parsed.wheres)...)}
 )
-toAST_Type(parsed, curlies::True, wheres::False) = :(
+_to_expr_Type(parsed, curlies::True, wheres::False) = :(
   $(to_expr(parsed.name)){$(to_expr(parsed.curlies)...)}
 )
-toAST_Type(parsed, curlies::False, wheres::True) = :(
+_to_expr_Type(parsed, curlies::False, wheres::True) = :(
   $(to_expr(parsed.name)) where {$(to_expr(parsed.wheres))}
 )
-toAST_Type(parsed, curlies::False, wheres::False) = to_expr(parsed.name)
+_to_expr_Type(parsed, curlies::False, wheres::False) = to_expr(parsed.name)
 
 
 # TypeRange
@@ -476,11 +477,11 @@ function parse_expr(parser::TypeRange, expr::Base.Expr)
   end
 end
 
-to_expr(parsed::TypeRange_Parsed) = toAST_TypeRange(parsed.lb, parsed.name, parsed.ub)
-toAST_TypeRange(::Base.Type{Union{}}, name, ::Base.Type{Any}) = name
-toAST_TypeRange(lb, name, ::Base.Type{Any}) = :($name >: $lb)
-toAST_TypeRange(::Base.Type{Union{}}, name, ub) = :($name <: $ub)
-toAST_TypeRange(lb, name, ub) = :($lb <: $name <: $ub)
+to_expr(parsed::TypeRange_Parsed) = _to_expr_TypeRange(parsed.lb, parsed.name, parsed.ub)
+_to_expr_TypeRange(::Base.Type{Union{}}, name, ::Base.Type{Any}) = name
+_to_expr_TypeRange(lb, name, ::Base.Type{Any}) = :($name >: $lb)
+_to_expr_TypeRange(::Base.Type{Union{}}, name, ub) = :($name <: $ub)
+_to_expr_TypeRange(lb, name, ub) = :($lb <: $name <: $ub)
 
 
 # TypeAnnotation
@@ -575,15 +576,15 @@ function parse_expr(parser::Arg, expr::Base.Expr)
   end
 end
 
-to_expr(parsed::Arg_Parsed) = _toAST_Arg(parsed.name, parsed.type, parsed.default)
-_toAST_Arg(::Nothing, type, ::NoDefault) = :(::$(to_expr(type)))
-_toAST_Arg(name, ::Base.Type{Any}, ::NoDefault) = to_expr(name)
-function _toAST_Arg(name, type, ::NoDefault)
+to_expr(parsed::Arg_Parsed) = _to_expr_Arg(parsed.name, parsed.type, parsed.default)
+_to_expr_Arg(::Nothing, type, ::NoDefault) = :(::$(to_expr(type)))
+_to_expr_Arg(name, ::Base.Type{Any}, ::NoDefault) = to_expr(name)
+function _to_expr_Arg(name, type, ::NoDefault)
   if type === Vararg
     Base.Expr(:..., to_expr(name))
   else
     :($(to_expr(name))::$(to_expr(type)))
   end
 end
-_toAST_Arg(name, ::Base.Type{Any}, default) = Base.Expr(:kw, to_expr(name), to_expr(default))
-_toAST_Arg(name, type, default) = Base.Expr(:kw, :($(to_expr(name))::$(to_expr(type))), to_expr(default))
+_to_expr_Arg(name, ::Base.Type{Any}, default) = Base.Expr(:kw, to_expr(name), to_expr(default))
+_to_expr_Arg(name, type, default) = Base.Expr(:kw, :($(to_expr(name))::$(to_expr(type))), to_expr(default))

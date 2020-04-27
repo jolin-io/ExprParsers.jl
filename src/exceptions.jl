@@ -20,7 +20,7 @@ subexprs(expr, ::Val{:macrocall}) = [expr; (subexprs(subexpr) for subexpr in exp
 subexprs(expr, ::Val{:comparison}) = [expr; (subexprs(subexpr) for subexpr in expr.args[1:2:end])...]  # only odd entries
 subexprs(expr, ::Val{:where}) = [expr]  # don't step into where because of TypeVariables
 subexprs(expr, ::Union{Val{:<:}, Val{:>:}}) = [expr; subexprs(expr.args[1]); subexprs(expr.args[2])]
-
+subexprs(expr, ::Val{:(=)}) = [expr; subexprs(expr.args[2])]
 
 
 """
