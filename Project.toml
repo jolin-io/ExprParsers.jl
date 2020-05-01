@@ -1,7 +1,7 @@
 name = "ExprParsers"
 uuid = "c5caad1f-83bd-4ce8-ac8e-4b29921e994e"
 authors = ["Sahm Stephan <stephan.sahm@gmx.de>"]
-version = "0.1.1"
+version = "0.3.0"
 
 [deps]
 ProxyInterface = "90c4b210-f34a-11e9-1a87-5d0d3aaf0cab"
