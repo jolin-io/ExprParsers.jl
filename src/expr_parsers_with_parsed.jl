@@ -17,7 +17,22 @@ function parse_expr(parser::ExprParserWithParsed, any)
   throw(ParseError("$(typeof(parser)) has no clause defined to capture Type '$(typeof(any))'. Got: $any"))
 end
 
+# one-line version
 function Base.show(io::IO, obj::Union{ExprParserWithParsed, ExprParsed})
+  type_name = typeof(obj).name.name
+  print(io, "EP.$type_name(")
+  field_names = fieldnames(typeof(obj))
+  for field in field_names[1:end-1]
+    print(io, "$field=$(repr(getproperty(obj, field))), ")
+  end
+  # last field extra
+  field = field_names[end]
+  print(io, "$field=$(repr(getproperty(obj, field)))")
+  print(io, ")")
+end
+
+# Multiline version, following https://docs.julialang.org/en/v1/manual/types/#man-custom-pretty-printing-1
+function Base.show(io::IO, ::MIME"text/plain", obj::Union{ExprParserWithParsed, ExprParsed})
   type_name = typeof(obj).name.name
   println(io, "EP.$type_name(")
   field_lengths = length.(string.(fieldnames(typeof(obj))))
