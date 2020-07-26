@@ -26,3 +26,19 @@ parse_expr(parser, to_expr(parsed)) == parsed
 Note that `ExprParsers` exports a constant `EP` which is an alias for the package `ExprParsers` itself. This comes in very handy when you use the custom parsers a lot.
 
 Checkout the `test/` directory for seeing more examples, especially [test/expr_parsers_with_parsed.jl](test/expr_parsers_with_parsed.jl) where for each common `Expr` pattern a parser is put into action.
+
+
+## Installation
+
+The package is soon going to be registered at General, until then you can use it by adding a custom registry.
+```julia
+using Pkg
+pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
+pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
+pkg"add ExprParsers"
+```
+
+Use it like
+```julia
+using ExprParsers
+```
