@@ -1,11 +1,5 @@
 # ExprParsers.jl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://schlichtanders.github.io/ExprParsers.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://schlichtanders.github.io/ExprParsers.jl/dev)
-[![Build Status](https://github.com/schlichtanders/ExprParsers.jl/workflows/CI/badge.svg)](https://github.com/schlichtanders/ExprParsers.jl/actions)
-[![Coverage](https://codecov.io/gh/schlichtanders/ExprParsers.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/schlichtanders/ExprParsers.jl)
-
-
 `ExprParsers` is a library made to simplify development of elaborate macros.
 
 What `ExprParsers` offers is a set of curated parsers for common `Expr` patterns. For example `parse_expr(ExprParsers.Function(), :(f(a) = 2a))` will give you a `ExprParsers.Function_Parsed` object where you can inspect and change `name`, `args`, `kwargs`, `curlies`, `wheres`, and the function `body`. It just works and you don't have to bother any longer that you can also write the same function as `function f(a); 2a; end` - the parser handles this for you.
@@ -25,4 +19,16 @@ parse_expr(parser, to_expr(parsed)) == parsed
 
 Note that `ExprParsers` exports a constant `EP` which is an alias for the package `ExprParsers` itself. This comes in very handy when you use the custom parsers a lot.
 
-Checkout the `test/` directory for seeing more examples, especially [test/expr_parsers_with_parsed.jl](test/expr_parsers_with_parsed.jl) where for each common `Expr` pattern a parser is put into action.
+Checkout the `test/` directory for seeing more examples, especially `test/expr_parsers_with_parsed.jl` where for each common `Expr` pattern a parser is put into action.
+
+## Manual Outline
+
+```@contents
+Pages = ["manual.md"]
+```
+
+## [Library Index](@id main-index)
+
+```@index
+Pages = ["library.md"]
+```

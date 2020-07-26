@@ -557,7 +557,7 @@ a::B = c
 end
 
 function parse_expr(parser::Arg, expr::Base.Symbol)
-  # don't use the parser for ``default``
+  # don't use the parser for `default`
   Arg_Parsed(
     name = parse_expr(parser.name, expr),
     type = parse_expr(parser.type, Any),
@@ -583,7 +583,7 @@ function parse_expr(parser::Arg, expr::Base.Expr)
       f(symbol::Base.Symbol) = symbol, Any
       f(parsed::TypeAnnotation_Parsed) = parsed.name, parsed.type
     end
-    # don't use the parser for ``default``
+    # don't use the parser for `default`
     Arg_Parsed(
       name = parse_expr(parser.name, name),
       type = parse_expr(parser.type, type),

@@ -2,9 +2,9 @@
     ExprParsers
 
 the main interface encompass just three concepts, which seamlessly interact with oneanother
-- macro ``@exprparser``: easily create definitions for highly flexible and nestable parsers
-- function ``parse_expr``: compares a matcher with a value, and returns a parsed value
-- function ``to_expr``: transforms parsed values back to AbstractSyntaxTrees
+- macro `@exprparser`: easily create definitions for highly flexible and nestable parsers
+- function `parse_expr`: compares a matcher with a value, and returns a parsed value
+- function `to_expr`: transforms parsed values back to AbstractSyntaxTrees
 """
 module ExprParsers
 export EP, @passert, ParseError,
@@ -32,7 +32,7 @@ if matches, by default will return the value if matches
 however Parsers will be called instead and return their parsed value
 """
 function parse_expr(parser, value)
-  @passert parser == value "Using default ``==`` comparison, but parser ``$(repr(parser))`` ≠ value ``$(repr(value))``."
+  @passert parser == value "Using default `==` comparison, but parser `$(repr(parser))` ≠ value `$(repr(value))`."
   value
 end
 # vectors are treated especially
@@ -58,19 +58,19 @@ to_expr(a::Union{Vector, Tuple}) = map(to_expr, a)  # reverses also Iterator
 to_expr(a::Base.Expr) = Base.Expr(a.head, to_expr(a.args)...)
 
 """
-All parsers in the ``ExprParsers`` package inherit from this type.
+All parsers in the `ExprParsers` package inherit from this type.
 """
 abstract type ExprParser end
 
 """
-This is mainly for internal usage. Please use ``@exprparser`` instead for the public interface.
+This is mainly for internal usage. Please use `@exprparser` instead for the public interface.
 
-Subtype of ``ExprParser`` which indicates that this parser actually constructs a `ExprParsed` object when calling
-``parse_expr``.
+Subtype of `ExprParser` which indicates that this parser actually constructs a `ExprParsed` object when calling
+`parse_expr`.
 The resulting `ExprParsed` object is a struct with identical fields like the parser,
 where then the parsed values will be stored.
 
-``ExprParsed(parser::ExprParserWithParsed)`` will return the corresponding ``ExprParsed`` type.
+`ExprParsed(parser::ExprParserWithParsed)` will return the corresponding `ExprParsed` type.
 """
 abstract type ExprParserWithParsed <: ExprParser end
 
