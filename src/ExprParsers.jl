@@ -13,6 +13,9 @@ export EP, @passert, ParseError,
 
 const EP = ExprParsers
 
+using Compat
+
+
 include("Utils.jl")
 using .Utils
 include("exceptions.jl")
