@@ -1,6 +1,11 @@
 Manual
 ======
 
+The main interface encompass just three concepts, which seamlessly interact with oneanother
+- macro [`@exprparser`](@ref): easily create definitions for highly flexible and nestable parsers
+- function [`parse_expr`](@ref): compares a matcher with a value, and returns a parsed value
+- function [`to_expr`](@ref): transforms parsed values back to AbstractSyntaxTrees
+
 TBD
 
 

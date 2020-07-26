@@ -27,12 +27,13 @@ include("syntax.jl")
 
 # TODO adapt doc string
 """
-  match something against a value, defaults to ==
+    parse_expr(parser, value)
 
-will throw ParseError if the parser does not match
 
-if matches, by default will return the value if matches
-however Parsers will be called instead and return their parsed value
+Match parser against a value, will throw ParseError if the parser does not match.
+
+Defaults to comparing with `==`, if matches, will return the value.
+Parsers will be called instead and return their parsed value.
 """
 function parse_expr(parser, value)
   @passert parser == value "Using default `==` comparison, but parser `$(repr(parser))` ≠ value `$(repr(value))`."
@@ -51,10 +52,12 @@ function parse_expr(parser::Base.Expr, values::Base.Expr)
 end
 
 """
-  convert called information back to AbstractSyntaxTree
+    to_expr(parsed)
 
-defaults to returning same value
-however if something knows about how it can be translated, just overload the function
+Converts parsed information back to Expr.
+
+Defaults to returning same value, however if something knows about how it can be translated back,
+just overload the function.
 """
 to_expr(a) = a
 to_expr(a::Union{Vector, Tuple}) = map(to_expr, a)  # reverses also Iterator
@@ -78,7 +81,7 @@ where then the parsed values will be stored.
 abstract type ExprParserWithParsed <: ExprParser end
 
 """
-  ExprParsed(parser::ExprParserWithParsed)::ExprParsed
+    ExprParsed(parser::ExprParserWithParsed)::ExprParsed
 
 Maps Parser to respective Parsed type, and is also abstract super type of all Parsed types.
 

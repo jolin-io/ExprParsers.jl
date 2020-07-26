@@ -40,6 +40,7 @@ jobs:
             pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
             pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
             '
+        shell: bash
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@v1
@@ -60,6 +61,7 @@ jobs:
             pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
             pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
             '
+        shell: bash
       - run: |
           julia --project=docs -e '
             using Pkg
