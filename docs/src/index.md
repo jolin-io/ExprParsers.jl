@@ -2,7 +2,11 @@
 
 `ExprParsers` is a library made to simplify development of elaborate macros.
 
-What `ExprParsers` offers is a set of curated parsers for common `Expr` patterns. For example `parse_expr(ExprParsers.Function(), :(f(a) = 2a))` will give you a `ExprParsers.Function_Parsed` object where you can inspect and change `name`, `args`, `kwargs`, `curlies`, `wheres`, and the function `body`. It just works and you don't have to bother any longer that you can also write the same function as `function f(a); 2a; end` - the parser handles this for you.
+What `ExprParsers` offers is a set of curated parsers for common `Expr` patterns. For example
+```julia
+parse_expr(ExprParsers.Function(), :(f(a) = 2a))
+```
+will give you an `ExprParsers.Function_Parsed` object where you can inspect and change `name`, `args`, `kwargs`, `curlies`, `wheres`, and the function `body`. It just works and you don't have to bother any longer that you can also write the same function as `function f(a); 2a; end` - the parser handles this for you.
 
 In macros you often not only want to inspect the given `Expr` in efficient and stable manners, but also may want to change parts and return a respectively adapted `Expr`. For this purpose, all Parsed objects can be converted back to `Expr` by using the `to_expr()` method.
 
