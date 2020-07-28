@@ -4,7 +4,7 @@ export nonempty, unwrap_where, rewrap_where, split_where, issomething, change_na
   @ifsomething, iterate_start, IterateStart, Iterator,
   True, False
 
-using ProxyInterface
+using ProxyInterfaces
 
 const True = Val{true}
 const False = Val{false}
@@ -92,8 +92,8 @@ Mark an iterable explicitly as an Iterator to add support for elementwise `parse
 struct Iterator{T}
   iterator::T
 end
-ProxyInterface.iterator(i::Iterator) = i.iterator
-ProxyInterface.iterator(::Base.Type{Iterator{T}}) where T = T
-ProxyInterface.@iterator Iterator
+ProxyInterfaces.iterator(i::Iterator) = i.iterator
+ProxyInterfaces.iterator(::Base.Type{Iterator{T}}) where T = T
+ProxyInterfaces.@iterator Iterator
 
 end  # module

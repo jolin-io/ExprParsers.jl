@@ -43,9 +43,9 @@ function Indexed(func_dict!)
   Indexed(mapping, paths, value)
 end
 
-ProxyInterface.dict(parser::Indexed) = parser._mapping
-ProxyInterface.dict(::Base.Type{Indexed{T}}) where T = T
-ProxyInterface.@dict Indexed
+ProxyInterfaces.dict(parser::Indexed) = parser._mapping
+ProxyInterfaces.dict(::Base.Type{Indexed{T}}) where T = T
+ProxyInterfaces.@dict Indexed
 
 function parse_expr(parser::Indexed{T}, expr) where T
   parsed = parse_expr(parser.value, expr)

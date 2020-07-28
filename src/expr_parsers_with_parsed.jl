@@ -1,7 +1,7 @@
 using Base.Iterators
 using SimpleMatch
 using StructEquality
-using ProxyInterface
+using ProxyInterfaces
 
 
 """
