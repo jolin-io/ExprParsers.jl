@@ -14,8 +14,10 @@ function parse_expr(parser::ExprParserWithParsed; kw...)
   ExprParsed(typeof(parser))(;kw′...)
 end
 function parse_expr(parser::ExprParserWithParsed, any)
-  throw(ParseError("$(typeof(parser)) has no clause defined to capture Type '$(typeof(any))'. Got: $any"))
+  throw(ParseError("$(typeof(parser)) has no clause defined to capture Type `$(typeof(any))`. Got: `$any`."))
 end
+
+# Overwriting show to print content by fields instead of positions.
 
 # one-line version
 function Base.show(io::IO, obj::Union{ExprParserWithParsed, ExprParsed})
@@ -44,6 +46,7 @@ function Base.show(io::IO, ::MIME"text/plain", obj::Union{ExprParserWithParsed, 
   println(io, ")")
 end
 
+
 # ExprParsers
 # ===========
 
@@ -51,10 +54,33 @@ end
 # ----
 
 """
-parses:
-```
+    EP.Expr(head = EP.anything, args = EP.anything)
+    EP.Expr(expr; [ignore_linenumbernodes=true])
+
+It is the most flexible parser, but hence also the least plug-and-play.
+
+Parses the following
+```julia
 Base.Expr(head, args...)
 ```
+
+# Examples
+
+```julia
+julia> using ExprParsers
+
+julia> parser = EP.Expr(head = :vect);
+
+julia> parse_expr(parser, :([1,2,3]))
+EP.Expr_Parsed(
+  head = :vect
+  args = Any[1, 2, 3]
+)
+julia> parse_expr(parser, :(f(a) = a))
+ERROR: ParseError: Using default `==` comparison, but parser `:vect` ≠ value `:(=)`.
+```
+
+Also see [`Indexed`](@ref) for an example to combine `EP.Indexed` with `EP.Expr`.
 """
 @exprparser struct Expr
   head = anything
@@ -80,14 +106,54 @@ end
 # Block
 # -----
 
-"""
-parses standard blocks of code or Vectors of Base.Expr
+@doc raw"""
+    EP.Block(block_expr; [ignore_linenumbernodes = true])
+    EP.Block(expr1, expr2, ...; [ignore_linenumbernodes = true])
+    EP.Block()
+
+Helper to parse blocks of code (i.e. `expr.head == :block`) or a given list of expr respectively.
+
+The main purpose is to handle linenumbernodes, otherwise it behaves similar to plain Vector of Expr.
+
+Parses the following
+```julia
+quote
+  any
+  4
+end
+[:(a = 4), 42, :anyvector]
+(:(a = 4), 42, :or_tuple_of_expr)
+end
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Block(quote
+         $(EP.anything)
+         $(EP.anysymbol)
+         13
+       end);
+
+julia> parse_expr(parser, [:(a = 4), :hi, 13])
+EP.Block_Parsed(
+  exprs = Any[:(a = 4), :hi, 13]
+)
+julia> parse_expr(parser, quote
+         whatever(a) = a
+         asymbol
+         14
+       end)
+ERROR: ParseError: Using default `==` comparison, but parser `13` ≠ value `14`.
+```
+Used within [`EP.Expr`](@ref).
 """
 @def_structequal struct Block <: ExprParserWithParsed
   exprs
   ignore_linenumbernodes::Bool
 
-  function Block(expr::Expr; ignore_linenumbernodes = true)
+  function Block(expr::Base.Expr; ignore_linenumbernodes = true)
     @assert expr.head == :block "Trying to construct a Block parser from a $(expr.head). Expecting :block."
     new(expr.args, ignore_linenumbernodes)
   end
@@ -144,9 +210,27 @@ end
 # -----
 
 """
-parses:
-```
+    Macro(name = EP.anything, args = EP.anything, linenumber = EP.Isa(LineNumberNode))
+
+Parses the following
+```julia
 @macroname arg1 arg2 ...
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Macro(name = :mymacro);
+
+julia> parse_expr(parser, :(@mymacro 1 two))
+EP.Macro_Parsed(
+  name       = :mymacro
+  args       = Any[1, :two]
+  linenumber = :(#= none:1 =#)
+)
+julia> parse_expr(parser, :(@anothermacro))
+ERROR: ParseError: Using default `==` comparison, but parser `:mymacro` ≠ value `:anothermacro`.
 ```
 """
 @exprparser struct Macro
@@ -167,9 +251,30 @@ end
 # ----------
 
 """
-parses:
+    EP.Assignment(left = EP.anything, right = EP.anything)
+
+Parses the following
 ```
 left = right
+```
+
+# Examples
+
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Assignment(left = EP.anysymbol)
+EP.Assignment(
+  left  = ExprParsers.Isa{Symbol}()
+  right = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(a = [1,2,3,4]))
+EP.Assignment_Parsed(
+  left  = :a
+  right = :([1, 2, 3, 4])
+)
+julia> parse_expr(parser, :(f(a) = a))
+ERROR: ParseError: Expected type `Symbol`, got `f(a)` of type `Expr`.
 ```
 """
 @exprparser struct Assignment
@@ -186,10 +291,33 @@ end
 # ---------
 
 """
-parses:
-```
+    EP.NestedDot(base = EP.anything, properties = EP.anything)
+
+Parses the following
+```julia
 a.b
 fun(T{:hi}).b.c.d.e.f
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers; using Base.Iterators
+
+julia> parser = EP.NestedDot(
+         properties = EP.Iterator(repeated(
+           EP.SatisfiesPredicate("It should start with 'a'.") do x
+             startswith(string(x), "a")
+           end
+         ))
+       );
+
+julia> parse_expr(parser, :(fun(T{:hi}).aone.atwo.athree))
+EP.NestedDot_Parsed(
+  base       = :(fun(T{:hi}))
+  properties = [:aone, :atwo, :athree]
+)
+julia> parse_expr(parser, :(fun(T{:hi}).aone.btwo.athree))
+ERROR: ParseError: Predicate `#1` returned false on expr `btwo`. It should start with 'a'.
 ```
 """
 @exprparser struct NestedDot
@@ -219,10 +347,38 @@ end
 # ---------
 
 """
-parses:
-```
+    EP.Reference(name = EP.anything, curlies = EP.anything)
+
+Parses the following
+```julia
 a
 a{b, c}
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Reference(curlies = [:A, EP.anysymbol])
+EP.Reference(
+  name    = ExprParsers.Isa{Any}()
+  curlies = Any[:A, ExprParsers.Isa{Symbol}()]
+)
+julia> parse_expr(parser, :(SomeType{A, B}))
+EP.Reference_Parsed(
+  name    = :SomeType
+  curlies = [:A, :B]
+)
+julia> parse_expr(parser, :(SomeType{A}))
+ERROR: ParseError: length(parser) == length(values) = false
+  length(parser) = 2
+  parser = Any[:A, ExprParsers.Isa{Symbol}()]
+  length(values) = 1
+  values = Any[:A]
+julia> parse_expr(parser, :(SomeType{B, C}))
+ERROR: ParseError: Using default `==` comparison, but parser `:A` ≠ value `:B`.
+julia> parse_expr(parser, :(SomeType{A, 1}))
+ERROR: ParseError: Expected type `Symbol`, got `1` of type `Int64`.
 ```
 """
 @exprparser struct Reference
@@ -237,7 +393,7 @@ function parse_expr(parser::Reference, expr::Base.Expr)
   elseif expr.head == :.
     parse_expr(parser, name = expr, curlies = [])
   else
-    throw(ParseError("Cannot parse expression as reference: $expr"))
+    throw(ParseError("Cannot parse expr `$expr` as reference: expr.head `$(expr.head)` not in `[:curly, :.]`."))
   end
 end
 
@@ -253,16 +409,44 @@ end
 # Call
 # ----
 
-_is_kws(expr::Base.Expr) = expr.head == :parameters
-_is_kws(any) = false
+@doc raw"""
+    EP.Call(
+      name = EP.anything,
+      curlies = EP.anything,
+      args = EP.anything,
+      kwargs = EP.anything)
 
-"""
-parses:
-```
+Parses the following
+```julia
 a()
 a(b, c)
 a{b, c}(d, e)
 ```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Call(name = :myfunc)
+EP.Call(
+  name    = :myfunc
+  curlies = ExprParsers.Isa{Any}()
+  args    = ExprParsers.Isa{Any}()
+  kwargs  = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(myfunc(a, b, c = 1; d = :hi)))
+EP.Call_Parsed(
+  name    = :myfunc
+  curlies = Any[]
+  args    = Any[:a, :b]
+  kwargs  = Any[:($(Expr(:kw, :c, 1))), :($(Expr(:kw, :d, :(:hi))))]
+)
+julia> parse_expr(parser, :(anotherfunc(a, b, c = 1; d = :hi)))
+ERROR: ParseError: Using default `==` comparison, but parser `:myfunc` ≠ value `:anotherfunc`.
+```
+
+Note that keyword arguments are represented using the default Expr representation
+`Expr(:kw, :key, "value")`.
 """
 @exprparser struct Call
   name = anything
@@ -274,13 +458,39 @@ end
 function parse_expr(parser::Call, expr::Base.Expr)
   @passert expr.head == :call
   called = parse_expr(Reference(), expr.args[1])
-  args, kwargs = if _is_kws(expr.args[2])
-    expr.args[3:end], expr.args[2].args
-  else
-    expr.args[2:end], []
-  end
+  args, kwargs = _extract_args_kwargs(expr.args)
   parse_expr(parser, name = called.name, curlies = called.curlies, args = args, kwargs = kwargs)
 end
+
+function _extract_args_kwargs(expr_args)
+  args = []
+  kwargs = []
+
+  parameters, otherargs = if isexpr(expr_args[2], :parameters)
+    expr_args[2].args, expr_args[3:end]
+  else
+    [], expr_args[2:end]
+  end
+
+  for p in otherargs
+    if isexpr(p, :kw)
+      push!(kwargs, p)
+    else
+      push!(args, p)
+    end
+  end
+
+  for p in parameters
+    if isexpr(p, :kw)
+      push!(kwargs, p)
+    else
+      error("syntax: invalid keyword argument syntax `$p`")
+    end
+  end
+
+  args, kwargs
+end
+
 
 to_expr(parsed::Call_Parsed) = _to_expr_Call(parsed, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}())
 _to_expr_Call(parsed, iscurlies::True, iswheres::True) = :(
@@ -301,11 +511,58 @@ _to_expr_Call(parsed, iscurlies::False, iswheres::False) = :(
 # ---------
 
 """
-parses:
-```
+    EP.Signature(
+      name = EP.anything,
+      curlies = EP.anything,
+      args = EP.anything,
+      kwargs = EP.anything,
+      wheres = EP.anything)
+
+Like [`EP.Call`](@ref) but with extra `wheres`, and the `name` field might stay empty.
+
+Parses the following:
+```julia
 a(b, c::Any)
 a(b::B, c) where B
 (::Any, c::C) where {C <: Number}
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Signature()
+EP.Signature(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  args    = ExprParsers.Isa{Any}()
+  kwargs  = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(f{T}(a::T) where T))
+EP.Signature_Parsed(
+  name    = :f
+  curlies = Any[:T]
+  args    = Any[:(a::T)]
+  kwargs  = Any[]
+  wheres  = Any[:T]
+)
+julia> parse_expr(parser, :((a, b::T) where T))
+EP.Signature_Parsed(
+  name    = nothing
+  curlies = Any[]
+  args    = Any[:T]
+  kwargs  = Any[]
+  wheres  = Any[:T]
+)
+julia> parse_expr(parser, :(f(a) = a))
+ERROR: ParseError: expr.head in (:where, :call, :tuple) = false
+  expr.head = :(=)
+  expr = :(f(a) = begin
+          #= none:1 =#
+          a
+      end)
+  (:where, :call, :tuple) = (:where, :call, :tuple)
 ```
 """
 @exprparser struct Signature
@@ -325,11 +582,8 @@ function parse_expr(parser::Signature, expr::Base.Expr)
   isanonymous = call.head == :tuple
 
   name, curlies, args, kwargs = if isanonymous
-    if _is_kws(call.args[1])
-      nothing, [], call.args[2:end], call.args[1].args
-    else
-      nothing, [], call.args, []
-    end
+    _args, _kwargs = _extract_args_kwargs(expr.args)
+    nothing, [], _args, _kwargs
   else
     parsed = parse_expr(Call(), call)
     parsed.name, parsed.curlies, parsed.args, parsed.kwargs
@@ -338,7 +592,10 @@ function parse_expr(parser::Signature, expr::Base.Expr)
 end
 
 to_expr(parsed::Signature_Parsed) = _to_expr_Signature(parsed, parsed.name, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}(), Val{nonempty(parsed.wheres)}())
-_to_expr_Signature(parsed, ::Nothing, iscurlies::True, _, _) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
+_to_expr_Signature(parsed, ::Nothing, iscurlies::True, ::False, ::False) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
+_to_expr_Signature(parsed, ::Nothing, iscurlies::True, ::False, ::True) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
+_to_expr_Signature(parsed, ::Nothing, iscurlies::True, ::True, ::False) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
+_to_expr_Signature(parsed, ::Nothing, iscurlies::True, ::True, ::True) = error("Impossible Reached: Given curlies but no name. parsed.curlies = $(parsed.curlies)")
 _to_expr_Signature(parsed, ::Nothing, ::False, iskwargs::False, iswheres::False) = :(
   ($(to_expr(parsed.args)...),)
 )
@@ -380,12 +637,61 @@ _to_expr_Signature(parsed, name, iscurlies::False, iskwargs::False, iswheres::Fa
 # --------
 
 """
-parses:
-```
+    EP.Function(
+      name = EP.anything,
+      curlies = EP.anything,
+      args = EP.anything,
+      kwargs = EP.anything,
+      wheres = EP.anything,
+      body = EP.anything)
+
+Parses full functions. For instance
+```julia
 function a(b, c) where B
   d
 end
 a(b, c) = d
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Function(
+         args = [EP.anything for i in 1:3],
+       )
+EP.Function(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  args    = [ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}()]
+  kwargs  = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+  body    = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(f(a, b, c) = a + b + c))
+EP.Function_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = [:a, :b, :c]
+  kwargs  = Any[]
+  wheres  = Any[]
+  body    = quote
+    #= none:1 =#
+    a + b + c
+end
+)
+julia> parse_expr(parser, :(
+         function g(a)
+           a
+         end
+       ))
+ERROR: ParseError: length(parser) == length(values) = false
+  length(parser) = 3
+  parser = [ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}()]
+  length(values) = 1
+  values = Any[:a]
+julia> parse_expr(parser, :a)
+ERROR: ParseError: ExprParsers.Function has no clause defined to capture Type `Symbol`. Got: `a`.
 ```
 """
 @exprparser struct Function
@@ -426,11 +732,34 @@ Signature_Parsed(parsed::Function_Parsed) = Signature_Parsed(
 # ----
 
 """
-parses:
-```
+    EP.Type(name = EP.anything, curlies = EP.anything, wheres = EP.anything)
+
+Parses the following:
+```julia
 a
 a{b, c}
 a{d} where d
+```
+
+# Examples
+
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Type()
+EP.Type(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(Array{T, 2} where T))
+EP.Type_Parsed(
+  name    = :Array
+  curlies = Any[:T, 2]
+  wheres  = Any[:T]
+)
+julia> parse_expr(parser, :(f(1,2)))
+ERROR: ParseError: Cannot parse expr `f(1, 2)` as reference: expr.head `call` not in `[:curly, :.]`.
 ```
 """
 @exprparser struct Type
@@ -464,14 +793,50 @@ _to_expr_Type(parsed, curlies::False, wheres::False) = to_expr(parsed.name)
 # ---------
 
 """
-parses:
+    EP.TypeRange(lb = EP.anything, name = EP.anything, ub = EP.anything)
+
+Note: Construct with `typevar = EP.anysymbol` to guarantee that only plain symbols can be used as type variable.
+
+Parses the following.
 ```
 TypeVar >: LowerBound
 TypeVar <: UpperBound
 LowerBound <: TypeVar <: UpperBound
 ```
 
-Note: Construct with `typevar = anysymbol` to guarantee that only plain symbols can be used as type variable
+# Examples
+```
+julia> using ExprParsers
+
+julia> parser = EP.TypeRange(name = EP.anysymbol)
+EP.TypeRange(
+  lb   = ExprParsers.Isa{Any}()
+  name = ExprParsers.Isa{Symbol}()
+  ub   = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(Int <: T <: Number))
+EP.TypeRange_Parsed(
+  lb   = :Int
+  name = :T
+  ub   = :Number
+)
+julia> parse_expr(parser, :(T <: Number))
+EP.TypeRange_Parsed(
+  lb   = Union{}
+  name = :T
+  ub   = :Number
+)
+julia> parse_expr(parser, :(Int <: 4)) # CAUTION: when using single `<:`, the order is decisive!
+EP.TypeRange_Parsed(
+  lb   = Union{}
+  name = :Int
+  ub   = 4
+)
+julia> parse_expr(parser, :(4 >: Int))
+ERROR: ParseError: Expected type `Symbol`, got `4` of type `Int64`.
+julia> parse_expr(parser, :(4 <: Int))
+ERROR: ParseError: Expected type `Symbol`, got `4` of type `Int64`.
+```
 """
 @exprparser struct TypeRange
   # naming is analog to Base.TypeVar
@@ -503,11 +868,36 @@ _to_expr_TypeRange(lb, name, ub) = :($lb <: $name <: $ub)
 # --------------
 
 """
-parses:
-```
+    EP.TypeAnnotation(name = EP.anything, type = EP.anything)
+
+Parses the following
+```julia
 a
 a::B
 ::B
+```
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.TypeAnnotation(type = :Int)
+EP.TypeAnnotation(
+  name = ExprParsers.Isa{Any}()
+  type = :Int
+)
+julia> parse_expr(parser, :(::Int))
+EP.TypeAnnotation_Parsed(
+  name = nothing
+  type = :Int
+)
+julia> parse_expr(parser, :(a::Int))
+EP.TypeAnnotation_Parsed(
+  name = :a
+  type = :Int
+)
+julia> parse_expr(parser, :(a::String))
+ERROR: ParseError: Using default `==` comparison, but parser `:Int` ≠ value `:String`.
 ```
 """
 @exprparser struct TypeAnnotation
@@ -539,14 +929,48 @@ end
 struct NoDefault end
 const nodefault = NoDefault()
 
-"""
-parses:
-```
+@doc raw"""
+    EP.Arg(name = EP.anything, type = EP.anything, default = EP.anything)
+
+A missing default value is indicated by the special variable `EP.nodefault` which is the unique instance of the
+singleton type `EP.NoDefault`.
+
+Parses the following
+```julia
 a
 a::B
 ::B
-a = c
-a::B = c
+a = c  # only :($(Expr(:kw, :a, :c))), not plain :(a = c)
+a::B = c  # only :($(Expr(:kw, :(a::B), :c))), not plain :(a::B = c)
+```
+
+# Examples
+
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Arg()
+EP.Arg(
+  name    = ExprParsers.Isa{Any}()
+  type    = ExprParsers.Isa{Any}()
+  default = ExprParsers.Isa{Any}()
+)
+julia> parse_expr(parser, :(a::B))
+EP.Arg_Parsed(
+  name    = :a
+  type    = :B
+  default = ExprParsers.NoDefault()
+)
+julia> parse_expr(parser, Expr(:kw, :a, 3))
+EP.Arg_Parsed(
+  name    = :a
+  type    = Any
+  default = 3
+)
+julia> parse_expr(parser, :(a = 3))
+ERROR: ParseError: AnyOf could not parse expr `a = 3` with any of the parsers `(ExprParsers.Isa{Symbol}(), EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}()))`. Arg should either be a Symbol or a TypeAnnotation.
+julia> parse_expr(parser, :(f(a)))
+ERROR: ParseError: AnyOf could not parse expr `f(a)` with any of the parsers `(ExprParsers.Isa{Symbol}(), EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}()))`. Arg should either be a Symbol or a TypeAnnotation.
 ```
 """
 @exprparser struct Arg
@@ -564,7 +988,8 @@ function parse_expr(parser::Arg, expr::Base.Symbol)
     default = nodefault)
 end
 
-const _arg_left_handside_parser = AnyOf(anysymbol, TypeAnnotation())
+const _arg_left_handside_parser = AnyOf(anysymbol, TypeAnnotation(),
+                                        errormessage = "Arg should either be a Symbol or a TypeAnnotation.")
 function parse_expr(parser::Arg, expr::Base.Expr)
   if expr.head == :kw
     name, type = @match(parse_expr(_arg_left_handside_parser, expr.args[1])) do f
@@ -592,6 +1017,7 @@ function parse_expr(parser::Arg, expr::Base.Expr)
 end
 
 to_expr(parsed::Arg_Parsed) = _to_expr_Arg(parsed.name, parsed.type, parsed.default)
+_to_expr_Arg(::Nothing, ::Base.Type{Any}, ::NoDefault) = :(::Any)
 _to_expr_Arg(::Nothing, type, ::NoDefault) = :(::$(to_expr(type)))
 _to_expr_Arg(name, ::Base.Type{Any}, ::NoDefault) = to_expr(name)
 function _to_expr_Arg(name, type, ::NoDefault)

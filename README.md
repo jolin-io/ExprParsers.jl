@@ -14,7 +14,7 @@ parse_expr(ExprParsers.Function(), :(f(a) = 2a))
 ```
 will give you an `ExprParsers.Function_Parsed` object where you can inspect and change `name`, `args`, `kwargs`, `curlies`, `wheres`, and the function `body`. It just works and you don't have to bother any longer that you can also write the same function as `function f(a); 2a; end` - the parser handles this for you.
 
-In macros you often not only want to inspect the given `Expr` in efficient and stable manners, but also may want to change parts and return a respectively adapted `Expr`. For this purpose, all Parsed objects can be converted back to `Expr` by using the `to_expr()` method.
+In macros you often not only want to inspect the given `Expr` in efficient and stable manners, but also may want to change parts and return a respectively adapted `Expr`. For this purpose, all Parsed objects are mutable and can be converted back to `Expr` by using the `to_expr(parsed_value)` method.
 
 We guarantee that `parse_expr` and `to_expr` are working nicely together, i.e. the following always holds for arbitrary expressions and parsers
 ```julia

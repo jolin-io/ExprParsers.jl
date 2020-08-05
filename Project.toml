@@ -1,7 +1,7 @@
 name = "ExprParsers"
 uuid = "c5caad1f-83bd-4ce8-ac8e-4b29921e994e"
 authors = ["Sahm Stephan <stephan.sahm@gmx.de>"]
-version = "1.1.0"
+version = "1.1.1"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
@@ -15,6 +15,7 @@ julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 
 [targets]
-test = ["Test"]
+test = ["Test", "Documenter"]

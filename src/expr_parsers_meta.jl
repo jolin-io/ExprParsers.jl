@@ -2,9 +2,32 @@
 # =====================
 
 """
-  identify Parser by Tag
+    EP.Named{:MyTag}(parser)
 
-Named Parsers can be easily identified by Type. The Nametag is also passed to the parsed value.
+Construct an ExprParser with a type identified by `MyTag`. This is helpful if you
+have multiple versions of a similar parser and would like to easily distinguish them during dispatch.
+
+The `Named{:MyTag}` wrapper is also passed on to the parsed value.
+
+Works with any ExprParser, also custom defined ones.
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser1 = EP.Named{:simple}(EP.Assignment(left = EP.anysymbol));
+
+julia> parser2 = EP.Named{:any}(EP.Assignment());
+
+julia> parse_expr(parser1, :(a = 4))
+ExprParsers.Named{:simple,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:a, right=4))
+julia> parse_expr(parser1, :(a.b = 4))
+ERROR: ParseError: Expected type `Symbol`, got `a.b` of type `Expr`.
+julia> parse_expr(parser2, :(a = 4))
+ExprParsers.Named{:any,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:a, right=4))
+julia> parse_expr(parser2, :(a.b = 4))
+ExprParsers.Named{:any,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:(a.b), right=4))
+```
 """
 @def_structequal struct Named{Name, T} <: ExprParser
   value::T
@@ -18,17 +41,56 @@ end
 to_expr(parsed::Named) = to_expr(parsed.value)
 
 
-"""
-adds a Mapping Layer to a possibly nested Parser with which you can refer into a deep nested subparser by name
+@doc raw"""
+    EP.Indexed(func_expecting_dict_as_only_argument)
 
-use like
-```
+Constructs an ExprParser where you can access dedicated subexpressions/subparsers via Dictionary lookup.
+Most importantly, the shortcuts are preserved during `parse_expr()`.
+
+Works with any ExprParser, also custom defined ones.
+
+Concretely, here a toy example
+```julia
 EP.Indexed() do dict
   EP.Expr(quote
-    a = \$(dict[:a] = EP.Isa(Int))
-    b = \$(dict[:b] = EP.anysymbol)
+    a = $(dict[:a] = EP.Isa(Int))
+    b = $(dict[:b] = EP.anysymbol)
   end)
 end
+```
+As you can see, `EP.Indexed` is expecting a function which takes a `dict` as the only argument.
+It best used with do-notation. The function then needs to return an `ExprParser`, but can do whatever it wants
+in principle.
+Shortcuts are now assigned by just using interpolation syntax `$(...)` and storing references to subparser
+into the given `dict`. For example you see that `EP.Isa(Int)` is captured as `dict[:a]` before being used as a
+subparser.
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> parser = EP.Indexed() do dict
+         EP.Expr(quote
+           a = $(dict[:a] = EP.Isa(Int))
+           b = $(dict[:b] = EP.anysymbol)
+         end)
+       end;
+
+julia> parser[:a]
+ExprParsers.Isa{Int64}()
+julia> parsed = parse_expr(parser, quote
+         a = 42
+         b = a
+       end);
+
+julia> parsed[:a], parsed[:b]
+(42, :a)
+
+julia> parse_expr(parser, quote
+         a = 42
+         b = :notasymbol
+       end);
+ERROR: ParseError: Expected type `Symbol`, got `:notasymbol` of type `QuoteNode`.
 ```
 """
 @def_structequal struct Indexed{T} <: ExprParser

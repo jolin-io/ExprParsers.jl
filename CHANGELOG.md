@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2020-08-02
+### Added
+- extensive docstring documentation
+### Fixed
+- `EP.Call` and `EP.Signature` now work correctly with keyword arguments like `f(a, b, c=1)` (i.e. not separated by `;`, but just by `,`)
+
 ## [1.1.0] - 2020-07-28
 ### Changed
 - switched dependency to ProxyInterfaces (plural) instead of deprecated ProxyInterface (singular)

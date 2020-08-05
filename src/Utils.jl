@@ -2,7 +2,8 @@ module Utils
 export nonempty, unwrap_where, rewrap_where, split_where, issomething, change_name!,
   get_name, find_object, get_object,
   @ifsomething, iterate_start, IterateStart, Iterator,
-  True, False
+  True, False,
+  isexpr
 
 using ProxyInterfaces
 
@@ -10,6 +11,32 @@ const True = Val{true}
 const False = Val{false}
 
 nonempty(a) = !isempty(a)
+
+"""
+    isexpr(expr) -> Bool
+    isexpr(expr, head) -> Bool
+
+Checks whether given value isa `Base.Expr` and if further given `head`, it also checks whether
+the `head` matches `expr.head`.
+
+# Examples
+```jldoctest
+julia> using ExprParsers
+
+julia> EP.isexpr(:(a = hi))
+true
+julia> EP.isexpr(12)
+false
+julia> EP.isexpr(:(f(a) = a), :(=))
+true
+julia> EP.isexpr(:(f(a) = a), :function)
+false
+```
+"""
+isexpr(::Expr) = true
+isexpr(other) = false
+isexpr(expr::Expr, head::Symbol) = expr.head == head
+isexpr(other, head::Symbol) = false
 
 """
 needed to properly match function signatures
@@ -64,9 +91,11 @@ issomething(::Any) = true
 If `expr` evaluates to `nothing`, equivalent to `return nothing`, otherwise the macro
 evaluates to the value of `expr`. Not exported, useful for implementing iterators.
 ```jldoctest
-julia> IterTools.@ifsomething iterate(1:2)
+julia> using ExprParsers
+
+julia> ExprParsers.@ifsomething iterate(1:2)
 (1, 1)
-julia> let elt, state = IterTools.@ifsomething iterate(1:2, 2); println("not reached"); end
+julia> let elt, state = ExprParsers.@ifsomething iterate(1:2, 2); println("not reached"); end
 ```
 """
 macro ifsomething(ex)

@@ -2,32 +2,62 @@ using StructEquality
 
 const SUFFIX = "_Parsed"
 """
-transforms
-```
-@exprparser struct MySymbol
+```julia
+EP.@exprparser struct MySymbol
   symbol = anything
 end
 ```
-to
-```
-StructEquality.@def_structequal Base.@kwdef struct MySymbol <: ExprParsers.ExprParserWithParsed
+is transformed to
+```julia
+StructEquality.@def_structequal Base.@kwdef struct MySymbol <: EP.ExprParserWithParsed
   symbol = anything
 end
-StructEquality.@def_structequal Base.@kwdef mutable struct MySymbol_Parsed{T} <: ExprParsers.ExprParsed
+StructEquality.@def_structequal Base.@kwdef mutable struct MySymbol_Parsed{T} <: EP.ExprParsed
   symbol
 end
-ExprParsers.ExprParsed(::Base.Type{MySymbol}) = MySymbol_Parsed
+EP.ExprParsed(::Base.Type{MySymbol}) = MySymbol_Parsed
 ```
 
+It defines the basics for an usual ExprParser, namely
+- the Parser type itself like specified in the original struct. It is always immutable - if you feel the need of
+  mutating a parser, try to construct a new parser instead.
+- a corresponding Parsed type which will be used to hold parsed values. This is intentionally mutable as a usual
+  workflow consists of adapting the parsed values to the needs of your macro, and if everything is changed, transform
+  it back to an Expr using `to_expr(parsed)`.
+- a mapping from the `ExprParser` to the `ExprParsed`
+
+
 Additionally, the created MySymbol Parser supports the following parsing syntax
-```
+```julia
 parser = MySymbol()
-parser(symbol = :hi)
+parse_expr(parser, symbol = :hi)
 ```
-translates to
-```
+which translates to
+```julia
 parser = MySymbol()
-MySymbol_Parsed(symbol = match(parser.symbol, :hi))
+MySymbol_Parsed(symbol = parse_expr(parser.symbol, :hi))
+```
+This is generic, and works similar if you have multiple fields.
+
+----------------
+
+Finally, in order to finish your custom ExprParser definition, you just need to specialize the two main functions
+- `parse_expr(mysymbolparser::MySymbol, expr)`
+- `to_expr(mysymbolparsed::MySymbol_Parsed)`
+
+```julia
+function EP.parse_expr(mysymbolparser::MySymbol, expr)
+  # do your custom parsing
+  # use @passert for checking parse assertions (it will have a nice and detailed default error message)
+  # construct your parsed result
+  MySymbol_Parsed(symbol = ...)
+end
+
+function EP.to_expr(parsed::MySymbol_Parsed)
+  # create a proper `Base.Expr` from your parsed result
+  # in this case it is simple
+  parsed.symbol
+end
 ```
 """
 # TODO performance improvement?: add typeparameters for every field (?)
@@ -88,6 +118,3 @@ function _parsed_struct_from_parser_struct(struct_expr::Base.Expr, newname)
 
   _h(struct_expr)
 end
-
-
-# TODO overwrite show representation to show keywords instead of position struct args

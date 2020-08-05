@@ -1,5 +1,9 @@
 
+"""
+    ParseError
 
+Special Exception Type to indicate that some parsing failed.
+"""
 struct ParseError <: Exception
   msg::AbstractString
 end
@@ -25,14 +29,27 @@ subexprs(expr, ::Val{:(=)}) = [expr; subexprs(expr.args[2])]
 
 """
     @passert cond [text]
+
 Throw an [`ParseError`](@ref) if `cond` is `false`. Preferred syntax for writing assertions.
 Message `text` is optionally displayed upon assertion failure.
 
+If no text is given a default
+rich text description is constructed, evaluating all found subexpressions for easier debugging.
+
 # Examples
 ```jldoctest
+julia> using ExprParsers
+
 julia> @passert iseven(3) "3 is an odd number!"
 ERROR: ParseError: 3 is an odd number!
 julia> @passert isodd(3) "What even are numbers?"
+
+julia> a = 3;
+
+julia> @passert a+2 == 4
+ERROR: ParseError: a + 2 == 4 = false
+  a + 2 = 5
+  a = 3
 ```
 
 Adapted from Base.@assert

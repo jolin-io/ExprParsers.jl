@@ -1,5 +1,12 @@
 using Test
 using ExprParsers
+using Documenter
+
+@test isempty(detect_ambiguities(ExprParsers))
+
+@testset "doctest" begin
+  doctest(ExprParsers)
+end
 
 """
   testing that `parser(parser(expr)) == parser(expr)`
