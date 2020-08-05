@@ -421,7 +421,14 @@ Parses the following
 a()
 a(b, c)
 a{b, c}(d, e)
+a{b, c}(d, e, f = 1; g = :two)
 ```
+
+Note that all keyword arguments are collected into the `kwargs` field, also those before `;`, corresponding to standard
+julia call semantics.
+
+Note that keyword arguments are represented using the default Expr representation
+`Expr(:kw, :key, "value")`.
 
 # Examples
 ```jldoctest
@@ -444,9 +451,6 @@ EP.Call_Parsed(
 julia> parse_expr(parser, :(anotherfunc(a, b, c = 1; d = :hi)))
 ERROR: ParseError: Using default `==` comparison, but parser `:myfunc` ≠ value `:anotherfunc`.
 ```
-
-Note that keyword arguments are represented using the default Expr representation
-`Expr(:kw, :key, "value")`.
 """
 @exprparser struct Call
   name = anything
@@ -458,18 +462,18 @@ end
 function parse_expr(parser::Call, expr::Base.Expr)
   @passert expr.head == :call
   called = parse_expr(Reference(), expr.args[1])
-  args, kwargs = _extract_args_kwargs(expr.args)
+  args, kwargs = _extract_args_kwargs__collect_all_kw_into_kwargs(expr.args[2:end])
   parse_expr(parser, name = called.name, curlies = called.curlies, args = args, kwargs = kwargs)
 end
 
-function _extract_args_kwargs(expr_args)
+function _extract_args_kwargs__collect_all_kw_into_kwargs(expr_args)
   args = []
   kwargs = []
 
-  parameters, otherargs = if isexpr(expr_args[2], :parameters)
-    expr_args[2].args, expr_args[3:end]
+  otherargs, parameters = if isexpr(expr_args[1], :parameters)
+    expr_args[2:end], expr_args[1].args
   else
-    [], expr_args[2:end]
+    expr_args, []
   end
 
   for p in otherargs
@@ -479,15 +483,7 @@ function _extract_args_kwargs(expr_args)
       push!(args, p)
     end
   end
-
-  for p in parameters
-    if isexpr(p, :kw)
-      push!(kwargs, p)
-    else
-      error("syntax: invalid keyword argument syntax `$p`")
-    end
-  end
-
+  append!(kwargs, parameters)
   args, kwargs
 end
 
@@ -510,7 +506,7 @@ _to_expr_Call(parsed, iscurlies::False, iswheres::False) = :(
 # Signature
 # ---------
 
-"""
+@doc raw"""
     EP.Signature(
       name = EP.anything,
       curlies = EP.anything,
@@ -518,13 +514,18 @@ _to_expr_Call(parsed, iscurlies::False, iswheres::False) = :(
       kwargs = EP.anything,
       wheres = EP.anything)
 
-Like [`EP.Call`](@ref) but with extra `wheres`, and the `name` field might stay empty.
+Similar to [`EP.Call`](@ref) but with a couple of differences
+- extra `wheres`
+- the `name` field might stay empty
+- `args` can also contain `Expr(:kw, key, value)` values
+  (corresponds to default value syntax, which is only available in signatures)
 
 Parses the following:
 ```julia
 a(b, c::Any)
 a(b::B, c) where B
 (::Any, c::C) where {C <: Number}
+f(::Any, c::C, d::Int=1; e=true) where {C <: Number}
 ```
 
 # Examples
@@ -551,8 +552,16 @@ julia> parse_expr(parser, :((a, b::T) where T))
 EP.Signature_Parsed(
   name    = nothing
   curlies = Any[]
-  args    = Any[:T]
+  args    = Any[:a, :(b::T)]
   kwargs  = Any[]
+  wheres  = Any[:T]
+)
+julia> parse_expr(parser, :(f(a, b::T, c::Any=3; d=true) where T))
+EP.Signature_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = Any[:a, :(b::T), :($(Expr(:kw, :(c::Any), 3)))]
+  kwargs  = Any[:($(Expr(:kw, :d, true)))]
   wheres  = Any[:T]
 )
 julia> parse_expr(parser, :(f(a) = a))
@@ -582,13 +591,23 @@ function parse_expr(parser::Signature, expr::Base.Expr)
   isanonymous = call.head == :tuple
 
   name, curlies, args, kwargs = if isanonymous
-    _args, _kwargs = _extract_args_kwargs(expr.args)
+    _args, _kwargs = _extract_args_kwargs__no_processing(call.args)
     nothing, [], _args, _kwargs
   else
-    parsed = parse_expr(Call(), call)
-    parsed.name, parsed.curlies, parsed.args, parsed.kwargs
+    called = parse_expr(Reference(), call.args[1])
+    _args, _kwargs = _extract_args_kwargs__no_processing(call.args[2:end])
+    called.name, called.curlies, _args, _kwargs
   end
   parse_expr(parser, name = name, curlies = curlies, args = args, kwargs = kwargs, wheres = wheres)
+end
+
+function _extract_args_kwargs__no_processing(expr_args)
+  args, kwargs = if isexpr(expr_args[1], :parameters)
+    expr_args[2:end], expr_args[1].args
+  else
+    expr_args, []
+  end
+  args, kwargs
 end
 
 to_expr(parsed::Signature_Parsed) = _to_expr_Signature(parsed, parsed.name, Val{nonempty(parsed.curlies)}(), Val{nonempty(parsed.kwargs)}(), Val{nonempty(parsed.wheres)}())
