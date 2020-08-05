@@ -1,4 +1,6 @@
-@exprparser struct MySymbol
+using ExprParsers
+
+EP.@exprparser struct MySymbol
   symbol = EP.anything
 end
 @test MySymbol <: EP.ExprParser

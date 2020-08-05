@@ -6,21 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.1.1] - 2020-08-02
+## [1.0.0] - 2020-08-05
 ### Added
 - extensive docstring documentation
-### Fixed
-- `EP.Call` and `EP.Signature` now work correctly with keyword arguments like `f(a, b, c=1)` (i.e. not separated by `;`, but just by `,`)
-
-## [1.1.0] - 2020-07-28
-### Changed
-- switched dependency to ProxyInterfaces (plural) instead of deprecated ProxyInterface (singular)
-
-## [1.0.0] - 2020-07-21
-### Added
 - GithubActions for CI, Codecov
 - Changelog
 - License
+
+### Changed
+- minimized exports to only export `EP`, `@passert`, `parse_expr`, `to_expr`
+- switched dependency to ProxyInterfaces (plural) instead of deprecated ProxyInterface (singular)
+- `EP.Call` now collects all keyword arguments into field `kwargs`, including those given on the args-site like `f(a, b, c=1)`
+
+### Fixed
+- `EP.Signature` no longer skips the first argument in anonymous function signatures
 
 ## [0.1.0] - 2020-05-01
 initial release

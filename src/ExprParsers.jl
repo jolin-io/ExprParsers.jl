@@ -9,8 +9,7 @@ The main interface encompass just three concepts, which seamlessly interact with
 - function `to_expr`: transforms parsed values back to `Base.Expr`
 """
 module ExprParsers
-export EP, @passert, ParseError,
-  parse_expr, to_expr
+export EP, @passert, parse_expr, to_expr
 
 const EP = ExprParsers
 

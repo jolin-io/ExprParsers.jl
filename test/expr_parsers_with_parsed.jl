@@ -7,7 +7,7 @@ using ExprParsers
 
 @testset "Block" begin
   parser = EP.Block(EP.anysymbol, :b, EP.Expr(:tuple, EP.anything))
-  @test_throws ParseError parse_expr(parser, quote
+  @test_throws EP.ParseError parse_expr(parser, quote
     5
     b
     (1,4,a)
@@ -28,7 +28,7 @@ end
   @test parsed.default == 4
   test_closure(parser, Expr(:kw, :a, 4))
 
-  @test_throws ParseError parse_expr(parser, :(a = 5))
+  @test_throws EP.ParseError parse_expr(parser, :(a = 5))
 
   expr = :(f(a::Int, b=5; c, d=6) = a + b + c + d)
   expr.args[1].args[3:end][2].head
@@ -76,7 +76,7 @@ end
 
   test_closure(parser, :(a::Int = 4))
 
-  @test_throws ParseError parse_expr(parser, :(a::Int))
+  @test_throws EP.ParseError parse_expr(parser, :(a::Int))
 end
 
 
@@ -90,16 +90,16 @@ end
 
   test_closure(parser, :(f{A, B}(a, b, c...; d...)))
 
-  @test_throws ParseError parse_expr(parser, :(a = 4))
+  @test_throws EP.ParseError parse_expr(parser, :(a = 4))
 end
 
 @testset "Expr" begin
   expr = Expr(:head, :a1, 2, [3,4])
   parsed_expr = EP.Expr_Parsed(:head, [:a1, 2, [3,4]])
   @test parse_expr(EP.Expr(), expr) == parsed_expr
-  @test_throws ParseError parse_expr(EP.Expr(head = EP.AnyOf(:hi, :ho)), expr)
+  @test_throws EP.ParseError parse_expr(EP.Expr(head = EP.AnyOf(:hi, :ho)), expr)
   @test parse_expr(EP.Expr(head = EP.AnyOf(:hi, :ho, :head)), expr) == parsed_expr
-  @test_throws ParseError parse_expr(EP.Expr(args = [1,2]), expr)
+  @test_throws EP.ParseError parse_expr(EP.Expr(args = [1,2]), expr)
   @test parse_expr(EP.Expr(args = [:a1, 2, [3,4]]), expr) == parsed_expr
   @test parse_expr(EP.Expr(args = [:a1, 2, EP.anything]), expr) == parsed_expr
 
@@ -133,7 +133,7 @@ end
 
   @test parsed.args.exprs[4].args[2] isa Base.Symbol
 
-  @test_throws ParseError parse_expr(parser, quote
+  @test_throws EP.ParseError parse_expr(parser, quote
     a = 4.0
     b = a
   end)
@@ -175,7 +175,7 @@ end
   @test parsed.wheres == [:A, :B]
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :(
+  @test_throws EP.ParseError parse_expr(parser, :(
     f = 5
   ))
 end
@@ -218,7 +218,7 @@ end
   @test parsed.wheres == [:A, :B]
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :(
+  @test_throws EP.ParseError parse_expr(parser, :(
     f = 5
   ))
 end
@@ -241,7 +241,7 @@ end
   @test parsed.properties == [:b, :c, :d]
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :(A{hi}))
+  @test_throws EP.ParseError parse_expr(parser, :(A{hi}))
 end
 
 @testset "Reference" begin
@@ -265,7 +265,7 @@ end
   @test parsed.curlies == []
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :(f(a, b)))
+  @test_throws EP.ParseError parse_expr(parser, :(f(a, b)))
 end
 
 
@@ -295,7 +295,7 @@ end
   @test parse_expr(parser, expr).wheres == [:T, :S]
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :(f(a, b)))
+  @test_throws EP.ParseError parse_expr(parser, :(f(a, b)))
 end
 
 @testset "TypeAnnotation" begin
@@ -310,7 +310,7 @@ end
   @test parse_expr(parser, expr).type == :Any
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :a)
+  @test_throws EP.ParseError parse_expr(parser, :a)
 end
 
 
@@ -334,5 +334,5 @@ end
   @test parse_expr(parser, expr).ub == :Any
   test_closure(parser, expr)
 
-  @test_throws ParseError parse_expr(parser, :a)
+  @test_throws EP.ParseError parse_expr(parser, :a)
 end

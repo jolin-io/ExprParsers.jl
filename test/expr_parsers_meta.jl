@@ -32,7 +32,7 @@ end
   @test indexed_parsed[:a] == 5
   to_expr(indexed_parsed)  # looks good, but hard to test automatically
 
-  @test_throws ParseError parse_expr(indexed_parser, quote
+  @test_throws EP.ParseError parse_expr(indexed_parser, quote
     a = 4.0
     b = a
   end)
