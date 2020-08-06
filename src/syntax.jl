@@ -60,8 +60,8 @@ function EP.to_expr(parsed::MySymbol_Parsed)
 end
 ```
 """
-# TODO performance improvement?: add typeparameters for every field (?)
 macro exprparser(parser_struct_expr)
+  # TODO performance improvement?: add typeparameters for every field (?)
   if parser_struct_expr.head == :block
     parser_struct_expr = parser_struct_expr.args[1]
   end

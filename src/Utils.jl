@@ -114,9 +114,30 @@ Base.iterate(a, ::IterateStart) = Base.iterate(a)
 
 # possibility to use Iterators as elementwise Parsers of possibly unknown length
 """
-    Itertor(some_iterable)
+    EP.Iterator(some_iterable)
 
 Mark an iterable explicitly as an Iterator to add support for elementwise `parse_expr`.
+
+# Examples
+
+```jldoctest
+julia> using ExprParsers; using Base.Iterators
+
+julia> parser = EP.Iterator(repeated(4));
+
+julia> parse_expr(parser, [4, 4])
+2-element Array{Int64,1}:
+ 4
+ 4
+julia> parse_expr(parser, [4, 4, 4, 4])
+4-element Array{Int64,1}:
+ 4
+ 4
+ 4
+ 4
+julia> parse_expr(parser, [3, 4])
+ERROR: ParseError: Using default `==` comparison, but parser `4` ≠ value `3`.
+```
 """
 struct Iterator{T}
   iterator::T

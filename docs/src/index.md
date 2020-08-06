@@ -25,13 +25,36 @@ Note that `ExprParsers` exports a constant `EP` which is an alias for the packag
 
 Checkout the `test/` directory for seeing more examples, especially `test/expr_parsers_with_parsed.jl` where for each common `Expr` pattern a parser is put into action.
 
+
+## Installation
+
+The package is soon going to be registered at General, until then you can use it by adding a custom registry.
+```julia
+using Pkg
+pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
+pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
+pkg"add ExprParsers"
+```
+
+Use it like
+```julia
+using ExprParsers
+```
+
+
 ## Manual Outline
 
 ```@contents
 Pages = ["manual.md"]
 ```
 
-## [Library Index](@id main-index)
+## [Library Outline](@id main-index)
+
+```@contents
+Pages = ["library.md"]
+```
+
+## Library Index
 
 ```@index
 Pages = ["library.md"]
