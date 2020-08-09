@@ -1,47 +1,475 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Library · ExprParsers.jl</title><link rel="canonical" href="https://schlichtanders.github.io/ExprParsers.jl/library/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">ExprParsers.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../manual/">Manual</a></li><li class="is-active"><a class="tocitem" href>Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Library</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Library</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/schlichtanders/ExprParsers.jl/blob/master/docs/src/library.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Public-API"><a class="docs-heading-anchor" href="#Public-API">Public API</a><a id="Public-API-1"></a><a class="docs-heading-anchor-permalink" href="#Public-API" title="Permalink"></a></h1><p>TBD</p><ul><li><a href="#ExprParsers.ExprParsers"><code>ExprParsers.ExprParsers</code></a></li><li><a href="#ExprParsers.Arg"><code>ExprParsers.Arg</code></a></li><li><a href="#ExprParsers.Arg_Parsed"><code>ExprParsers.Arg_Parsed</code></a></li><li><a href="#ExprParsers.Assignment"><code>ExprParsers.Assignment</code></a></li><li><a href="#ExprParsers.Assignment_Parsed"><code>ExprParsers.Assignment_Parsed</code></a></li><li><a href="#ExprParsers.Block"><code>ExprParsers.Block</code></a></li><li><a href="#ExprParsers.Call"><code>ExprParsers.Call</code></a></li><li><a href="#ExprParsers.Call_Parsed"><code>ExprParsers.Call_Parsed</code></a></li><li><a href="#ExprParsers.Expr"><code>ExprParsers.Expr</code></a></li><li><a href="#ExprParsers.ExprParsed"><code>ExprParsers.ExprParsed</code></a></li><li><a href="#ExprParsers.ExprParser"><code>ExprParsers.ExprParser</code></a></li><li><a href="#ExprParsers.ExprParserWithParsed"><code>ExprParsers.ExprParserWithParsed</code></a></li><li><a href="#ExprParsers.Expr_Parsed"><code>ExprParsers.Expr_Parsed</code></a></li><li><a href="#ExprParsers.Function"><code>ExprParsers.Function</code></a></li><li><a href="#ExprParsers.Function_Parsed"><code>ExprParsers.Function_Parsed</code></a></li><li><a href="#ExprParsers.Indexed"><code>ExprParsers.Indexed</code></a></li><li><a href="#ExprParsers.Macro"><code>ExprParsers.Macro</code></a></li><li><a href="#ExprParsers.Macro_Parsed"><code>ExprParsers.Macro_Parsed</code></a></li><li><a href="#ExprParsers.Named"><code>ExprParsers.Named</code></a></li><li><a href="#ExprParsers.NestedDot"><code>ExprParsers.NestedDot</code></a></li><li><a href="#ExprParsers.NestedDot_Parsed"><code>ExprParsers.NestedDot_Parsed</code></a></li><li><a href="#ExprParsers.Reference"><code>ExprParsers.Reference</code></a></li><li><a href="#ExprParsers.Reference_Parsed"><code>ExprParsers.Reference_Parsed</code></a></li><li><a href="#ExprParsers.Signature"><code>ExprParsers.Signature</code></a></li><li><a href="#ExprParsers.Signature_Parsed"><code>ExprParsers.Signature_Parsed</code></a></li><li><a href="#ExprParsers.Type"><code>ExprParsers.Type</code></a></li><li><a href="#ExprParsers.TypeAnnotation"><code>ExprParsers.TypeAnnotation</code></a></li><li><a href="#ExprParsers.TypeAnnotation_Parsed"><code>ExprParsers.TypeAnnotation_Parsed</code></a></li><li><a href="#ExprParsers.TypeRange"><code>ExprParsers.TypeRange</code></a></li><li><a href="#ExprParsers.TypeRange_Parsed"><code>ExprParsers.TypeRange_Parsed</code></a></li><li><a href="#ExprParsers.Type_Parsed"><code>ExprParsers.Type_Parsed</code></a></li><li><a href="#ExprParsers._find_object-Tuple{Any,Union{Tuple, Dict, Array{T,1} where T}}"><code>ExprParsers._find_object</code></a></li><li><a href="#ExprParsers._get_struct_name-Tuple{Expr}"><code>ExprParsers._get_struct_name</code></a></li><li><a href="#ExprParsers._parsed_struct_from_parser_struct-Tuple{Expr,Any}"><code>ExprParsers._parsed_struct_from_parser_struct</code></a></li><li><a href="#ExprParsers.parse_expr-Tuple{ExprParsers.ExprParserWithParsed}"><code>ExprParsers.parse_expr</code></a></li><li><a href="#ExprParsers.parse_expr-Tuple{Any,Any}"><code>ExprParsers.parse_expr</code></a></li><li><a href="#ExprParsers.to_expr-Tuple{Any}"><code>ExprParsers.to_expr</code></a></li><li><a href="#ExprParsers.@passert-Tuple{Any,Vararg{Any,N} where N}"><code>ExprParsers.@passert</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParsers" href="#ExprParsers.ExprParsers"><code>ExprParsers.ExprParsers</code></a> — <span class="docstring-category">Module</span></header><section><div><pre><code class="language-julia">ExprParsers</code></pre><p>the main interface encompass just three concepts, which seamlessly interact with oneanother</p><ul><li>macro <code>@exprparser</code>: easily create definitions for highly flexible and nestable parsers</li><li>function <code>parse_expr</code>: compares a matcher with a value, and returns a parsed value</li><li>function <code>to_expr</code>: transforms parsed values back to AbstractSyntaxTrees</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/ExprParsers.jl#LL1-L8">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Arg" href="#ExprParsers.Arg"><code>ExprParsers.Arg</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a::B
-::B
-a = c
-a::B = c</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L9">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Arg_Parsed" href="#ExprParsers.Arg_Parsed"><code>ExprParsers.Arg_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a::B
-::B
-a = c
-a::B = c</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L9">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Assignment" href="#ExprParsers.Assignment"><code>ExprParsers.Assignment</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">left = right</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L5">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Assignment_Parsed" href="#ExprParsers.Assignment_Parsed"><code>ExprParsers.Assignment_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">left = right</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L5">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Block" href="#ExprParsers.Block"><code>ExprParsers.Block</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses standard blocks of code or Vectors of Base.Expr</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L2">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Call" href="#ExprParsers.Call"><code>ExprParsers.Call</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a()
-a(b, c)
-a{b, c}(d, e)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Call_Parsed" href="#ExprParsers.Call_Parsed"><code>ExprParsers.Call_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a()
-a(b, c)
-a{b, c}(d, e)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Expr" href="#ExprParsers.Expr"><code>ExprParsers.Expr</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">Base.Expr(head, args...)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L5">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParsed" href="#ExprParsers.ExprParsed"><code>ExprParsers.ExprParsed</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">ExprParsed(parser::ExprParserWithParsed)::ExprParsed</code></pre><p>Maps Parser to respective Parsed type, and is also abstract super type of all Parsed types.</p><p>Example</p><pre><code class="language-none">EP.ExprParsed(EP.Assignment) == EP.Assignment_Parsed</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/ExprParsers.jl#LL83-L92">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParser" href="#ExprParsers.ExprParser"><code>ExprParsers.ExprParser</code></a> — <span class="docstring-category">Type</span></header><section><div><p>All parsers in the <code>ExprParsers</code> package inherit from this type.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/ExprParsers.jl#LL66-L68">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParserWithParsed" href="#ExprParsers.ExprParserWithParsed"><code>ExprParsers.ExprParserWithParsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>This is mainly for internal usage. Please use <code>@exprparser</code> instead for the public interface.</p><p>Subtype of <code>ExprParser</code> which indicates that this parser actually constructs a <code>ExprParsed</code> object when calling <code>parse_expr</code>. The resulting <code>ExprParsed</code> object is a struct with identical fields like the parser, where then the parsed values will be stored.</p><p><code>ExprParsed(parser::ExprParserWithParsed)</code> will return the corresponding <code>ExprParsed</code> type.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/ExprParsers.jl#LL71-L80">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Expr_Parsed" href="#ExprParsers.Expr_Parsed"><code>ExprParsers.Expr_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">Base.Expr(head, args...)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L5">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Function" href="#ExprParsers.Function"><code>ExprParsers.Function</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">function a(b, c) where B
-  d
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Library · ExprParsers.jl</title><link rel="canonical" href="https://schlichtanders.github.io/ExprParsers.jl/library/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">ExprParsers.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../manual/">Manual</a></li><li class="is-active"><a class="tocitem" href>Library</a><ul class="internal"><li><a class="tocitem" href="#Interface"><span>Interface</span></a></li><li><a class="tocitem" href="#Types"><span>Types</span></a></li><li><a class="tocitem" href="#Core-ExprParser"><span>Core ExprParser</span></a></li><li><a class="tocitem" href="#Meta-ExprParser"><span>Meta ExprParser</span></a></li><li><a class="tocitem" href="#ExprParserWithParsed"><span>ExprParserWithParsed</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Library</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Library</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/schlichtanders/ExprParsers.jl/blob/master/docs/src/library.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Public-API"><a class="docs-heading-anchor" href="#Public-API">Public API</a><a id="Public-API-1"></a><a class="docs-heading-anchor-permalink" href="#Public-API" title="Permalink"></a></h1><h2 id="Interface"><a class="docs-heading-anchor" href="#Interface">Interface</a><a id="Interface-1"></a><a class="docs-heading-anchor-permalink" href="#Interface" title="Permalink"></a></h2><ul><li><a href="#ExprParsers.EP"><code>EP</code></a></li><li><a href="#ExprParsers.parse_expr"><code>parse_expr</code></a></li><li><a href="#ExprParsers.to_expr"><code>to_expr</code></a></li><li><a href="#ExprParsers.@passert"><code>@passert</code></a></li><li><a href="#ExprParsers.ParseError"><code>ParseError</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.EP" href="#ExprParsers.EP"><code>ExprParsers.EP</code></a> — <span class="docstring-category">Module</span></header><section><div><pre><code class="language-julia">EP = ExprParsers</code></pre><p>Short alias for the <code>ExprParsers</code> package.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/ExprParsers.jl#LL14-L18">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.parse_expr" href="#ExprParsers.parse_expr"><code>ExprParsers.parse_expr</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">parse_expr(parser, value)</code></pre><p>Match parser against a value, will throw ParseError if the parser does not match.</p><p>Defaults to comparing with <code>==</code>, if matches, will return the value. Parsers will be called instead and return their parsed value.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parse_expr(:a, :a)
+:a
+julia&gt; parse_expr([1,2,3], [1,2,3])
+3-element Array{Int64,1}:
+ 1
+ 2
+ 3
+julia&gt; parse_expr([1,2,3], [1,2,35])
+ERROR: ParseError: Using default `==` comparison, but parser `3` ≠ value `35`.
+julia&gt; parse_expr(:(a = 4), :(a = 5))
+ERROR: ParseError: Using default `==` comparison, but parser `4` ≠ value `5`.
+julia&gt; parse_expr([1,2,3,4], [1,2])
+ERROR: ParseError: length(parser) == length(values) = false
+  length(parser) = 4
+  parser = [1, 2, 3, 4]
+  length(values) = 2
+  values = [1, 2]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/ExprParsers.jl#LL33-L63">source</a></section><section><div><p>All ExprParserWithParsed have a common parse_expr method, namely that all struct fields are given directly as keyword arguments.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_with_parsed.jl#LL7-L9">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.to_expr" href="#ExprParsers.to_expr"><code>ExprParsers.to_expr</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">to_expr(parsed)</code></pre><p>Converts parsed information back to Expr.</p><p>Defaults to returning same value, however if something knows about how it can be translated back, just overload the function.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/ExprParsers.jl#LL83-L90">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.@passert" href="#ExprParsers.@passert"><code>ExprParsers.@passert</code></a> — <span class="docstring-category">Macro</span></header><section><div><pre><code class="language-julia">@passert cond [text]</code></pre><p>Throw an <a href="#ExprParsers.ParseError"><code>ParseError</code></a> if <code>cond</code> is <code>false</code>. Preferred syntax for writing assertions. Message <code>text</code> is optionally displayed upon assertion failure.</p><p>If no text is given a default rich text description is constructed, evaluating all found subexpressions for easier debugging.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; @passert iseven(3) &quot;3 is an odd number!&quot;
+ERROR: ParseError: 3 is an odd number!
+julia&gt; @passert isodd(3) &quot;What even are numbers?&quot;
+
+julia&gt; a = 3;
+
+julia&gt; @passert a+2 == 4
+ERROR: ParseError: a + 2 == 4 = false
+  a + 2 = 5
+  a = 3</code></pre><p>Adapted from Base.@assert</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/exceptions.jl#LL30-L56">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ParseError" href="#ExprParsers.ParseError"><code>ExprParsers.ParseError</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.ParseError</code></pre><p>Special Exception Type to indicate that some parsing failed.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/exceptions.jl#LL2-L6">source</a></section></article><h2 id="Types"><a class="docs-heading-anchor" href="#Types">Types</a><a id="Types-1"></a><a class="docs-heading-anchor-permalink" href="#Types" title="Permalink"></a></h2><ul><li><a href="#ExprParsers.ExprParser"><code>ExprParser</code></a></li><li><a href="#ExprParsers.ExprParserWithParsed"><code>ExprParserWithParsed</code></a></li><li><a href="#ExprParsers.ExprParsed"><code>ExprParsed</code></a></li><li><a href="#ExprParsers.@exprparser"><code>@exprparser</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParser" href="#ExprParsers.ExprParser"><code>ExprParsers.ExprParser</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.ExprParser</code></pre><p>All parsers in the <code>ExprParsers</code> package inherit from this type.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/ExprParsers.jl#LL96-L100">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParserWithParsed" href="#ExprParsers.ExprParserWithParsed"><code>ExprParsers.ExprParserWithParsed</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.ExprParserWithParsed</code></pre><p>This Type is mainly for internal usage. Please use <a href="#ExprParsers.@exprparser"><code>@exprparser</code></a> instead for the public interface.</p><p>It is a subtype of <a href="#ExprParsers.ExprParser"><code>ExprParser</code></a> which indicates that this parser actually constructs a <a href="#ExprParsers.ExprParsed"><code>ExprParsed</code></a> object when calling <code>parse_expr(parser, expr)</code>.</p><p>The resulting <code>ExprParsed</code> object is a struct with identical fields like the parser, where then the parsed values will be stored.</p><p><code>ExprParsed(parser::ExprParserWithParsed)</code> will return the corresponding <code>ExprParsed</code> type.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/ExprParsers.jl#LL108-L120">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.ExprParsed" href="#ExprParsers.ExprParsed"><code>ExprParsers.ExprParsed</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.ExprParsed(ParserType::Type{&lt;:ExprParserWithParsed}) -&gt; Type{&lt;:ExprParsed}</code></pre><p>Maps Parser Type to respective Parsed Type, and is also abstract super type of all Parsed types.</p><p>Example</p><pre><code class="language-none">EP.ExprParsed(EP.Assignment) == EP.Assignment_Parsed</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/ExprParsers.jl#LL123-L132">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.@exprparser" href="#ExprParsers.@exprparser"><code>ExprParsers.@exprparser</code></a> — <span class="docstring-category">Macro</span></header><section><div><pre><code class="language-julia">EP.@exprparser struct MySymbol
+  symbol = EP.anything = :default_parsed_value
+end</code></pre><p>is transformed to</p><pre><code class="language-julia">Base.@kwdef struct MySymbol &lt;: EP.ExprParserWithParsed
+  symbol = anything
 end
-a(b, c) = d</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L8">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Function_Parsed" href="#ExprParsers.Function_Parsed"><code>ExprParsers.Function_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">function a(b, c) where B
-  d
+Base.@kwdef mutable struct MySymbol_Parsed{T} &lt;: EP.ExprParsed
+  symbol = :default_parsed_value
 end
-a(b, c) = d</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L8">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Indexed" href="#ExprParsers.Indexed"><code>ExprParsers.Indexed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>adds a Mapping Layer to a possibly nested Parser with which you can refer into a deep nested subparser by name</p><p>use like</p><pre><code class="language-none">EP.Indexed() do dict
+EP.ExprParsed(::Base.Type{MySymbol}) = MySymbol_Parsed</code></pre><p>It defines the basics for an usual ExprParser, namely</p><ul><li>the Parser type itself like specified in the original struct. It is always immutable - if you feel the need of mutating a parser, try to construct a new parser instead.</li><li>a corresponding Parsed type which will be used to hold parsed values. This is intentionally mutable as a usual workflow consists of adapting the parsed values to the needs of your macro, and if everything is changed, transform it back to an Expr using <code>to_expr(parsed)</code>.</li><li>a mapping from the <code>ExprParser</code> to the <code>ExprParsed</code></li></ul><p>Additionally, the created MySymbol Parser supports the following default <code>parse_expr</code> functionality</p><pre><code class="language-julia">parser = MySymbol()
+parse_expr(parser, symbol = :hi)</code></pre><p>which translates to</p><pre><code class="language-julia">parser = MySymbol()
+MySymbol_Parsed(symbol = parse_expr(parser.symbol, :hi))</code></pre><p>This is generic, and works similar if you have multiple fields.</p><hr/><p>Finally, in order to finish your custom ExprParser definition, you just need to specialize the two main functions</p><ul><li><code>parse_expr(mysymbolparser::MySymbol, expr)</code></li><li><code>to_expr(mysymbolparsed::MySymbol_Parsed)</code></li></ul><pre><code class="language-julia">function EP.parse_expr(mysymbolparser::MySymbol, expr)
+  # do your custom parsing
+  # use @passert for checking parse assertions (it will have a nice and detailed default error message)
+  # construct your parsed result
+  MySymbol_Parsed(symbol = ...)
+end
+
+function EP.to_expr(parsed::MySymbol_Parsed)
+  # create a proper `Base.Expr` from your parsed result
+  # in this case it is simple
+  parsed.symbol
+end</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/syntax.jl#LL4-L62">source</a></section></article><h2 id="Core-ExprParser"><a class="docs-heading-anchor" href="#Core-ExprParser">Core ExprParser</a><a id="Core-ExprParser-1"></a><a class="docs-heading-anchor-permalink" href="#Core-ExprParser" title="Permalink"></a></h2><ul><li><a href="#ExprParsers.Utils.Iterator"><code>ExprParsers.Utils.Iterator</code></a></li><li><a href="#ExprParsers.SatisfiesPredicate"><code>SatisfiesPredicate</code></a></li><li><a href="#ExprParsers.Isa"><code>Isa</code></a></li><li><a href="#ExprParsers.anything"><code>anything</code></a></li><li><a href="#ExprParsers.anysymbol"><code>anysymbol</code></a></li><li><a href="#ExprParsers.AnyOf"><code>AnyOf</code></a></li><li><a href="#ExprParsers.AllOf"><code>AllOf</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Utils.Iterator" href="#ExprParsers.Utils.Iterator"><code>ExprParsers.Utils.Iterator</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Iterator(some_iterable)</code></pre><p>Mark an iterable explicitly as an Iterator to add support for elementwise <code>parse_expr</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers; using Base.Iterators
+
+julia&gt; parser = EP.Iterator(repeated(4));
+
+julia&gt; parse_expr(parser, [4, 4])
+2-element Array{Int64,1}:
+ 4
+ 4
+julia&gt; parse_expr(parser, [4, 4, 4, 4])
+4-element Array{Int64,1}:
+ 4
+ 4
+ 4
+ 4
+julia&gt; parse_expr(parser, [3, 4])
+ERROR: ParseError: Using default `==` comparison, but parser `4` ≠ value `3`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/Utils.jl#LL116-L141">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.SatisfiesPredicate" href="#ExprParsers.SatisfiesPredicate"><code>ExprParsers.SatisfiesPredicate</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.SatisfiesPredicate(predicate_func[, errormessage])</code></pre><p>Construct an ExprParser which checks whether the given <code>predicate_func</code> returns true. If so, the to-be-parsed value is returned as such, otherwise an <a href="#ExprParsers.ParseError"><code>ParseError</code></a> is thrown as usual. If <code>errormessage</code> is given, it will be appended to the default error message.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers;
+
+julia&gt; parser = EP.SatisfiesPredicate(isodd);
+
+julia&gt; parse_expr(parser, 3)
+3
+julia&gt; parse_expr(parser, 4)
+ERROR: ParseError: Predicate `isodd` returned false on expr `4`.
+julia&gt; is44(x) = x==44;
+
+julia&gt; parser2 = EP.SatisfiesPredicate(is44, &quot;It should be 44.&quot;);
+
+julia&gt; parse_expr(parser2, 44)
+44
+julia&gt; parse_expr(parser2, 4)
+ERROR: ParseError: Predicate `is44` returned false on expr `4`. It should be 44.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_core.jl#LL4-L30">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Isa" href="#ExprParsers.Isa"><code>ExprParsers.Isa</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Isa(T::Type)</code></pre><p>Constructs an ExprParser which checks whether a value is of the given type.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Isa(Symbol);
+
+julia&gt; parse_expr(parser, :thisisasymbol)
+:thisisasymbol
+julia&gt; parse_expr(parser, 42)
+ERROR: ParseError: Expected type `Symbol`, got `42` of type `Int64`.</code></pre><p><code>EP.Isa(Symbol)</code> is so common that there is a special constant for it <a href="#ExprParsers.anysymbol"><code>anysymbol</code></a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_core.jl#LL42-L60">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.anything" href="#ExprParsers.anything"><code>ExprParsers.anything</code></a> — <span class="docstring-category">Constant</span></header><section><div><pre><code class="language-julia">EP.anything = Isa(Any)</code></pre><p>Special constant ExprParser which matches literally anything.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parse_expr(EP.anything, 42)
+42
+julia&gt; parse_expr(EP.anything, :whatever)
+:whatever</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_core.jl#LL68-L82">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.anysymbol" href="#ExprParsers.anysymbol"><code>ExprParsers.anysymbol</code></a> — <span class="docstring-category">Constant</span></header><section><div><pre><code class="language-julia">EP.anysymbol = Isa(Symbol)</code></pre><p>Special constant ExprParser which matches Symbols, and only Symbols.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parse_expr(EP.anysymbol, :asymbol)
+:asymbol
+julia&gt; parse_expr(EP.anysymbol, 42)
+ERROR: ParseError: Expected type `Symbol`, got `42` of type `Int64`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_core.jl#LL85-L99">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.AnyOf" href="#ExprParsers.AnyOf"><code>ExprParsers.AnyOf</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.AnyOf(parser1, parser2, parser3, ...; errormessage = &quot;&quot;)</code></pre><p>Constructs an ExprParser from multiple given parsers. When given a value it first tries to match <code>parser1</code>, and if that fails with a ParseError, then <code>parser2</code>, and so forth. The result from the first parser which matches will be returned. If no parser matches, a dedicated ParseError is raised.</p><p>If <code>errormessage</code> is given, it will be appended to the default error message in case of ParseError.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.AnyOf(EP.anysymbol, EP.Isa(String), EP.SatisfiesPredicate(isodd),
+                         errormessage=&quot;My error message.&quot;);
+
+julia&gt; parse_expr(parser, :hi)
+:hi
+julia&gt; parse_expr(parser, 3)
+3
+julia&gt; parse_expr(parser, &quot;something&quot;)
+&quot;something&quot;
+julia&gt; parse_expr(parser, 4)
+ERROR: ParseError: AnyOf could not parse expr `4` with any of the parsers `(ExprParsers.Isa{Symbol}(), ExprParsers.Isa{String}(), ExprParsers.SatisfiesPredicate{typeof(isodd)}(isodd, &quot;&quot;))`. My error message.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_core.jl#LL102-L128">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.AllOf" href="#ExprParsers.AllOf"><code>ExprParsers.AllOf</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.AllOf(parser1, parser2, parser3, ...)</code></pre><p>Constructs an ExprParser from multiple given parsers. When to match a value, all parsers actually need to parse correctly, otherwise the <code>ParseError</code> from the first non-matching parser is rethrown. If all parsers match, then the return value from the last parser is returned.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.AllOf(EP.Isa(Number), EP.SatisfiesPredicate(isodd), 3);
+
+julia&gt; parse_expr(parser, 3)
+3
+julia&gt; parse_expr(parser, &quot;something&quot;)
+ERROR: ParseError: Expected type `Number`, got `something` of type `String`.
+julia&gt; parse_expr(parser, 4)
+ERROR: ParseError: Predicate `isodd` returned false on expr `4`.
+julia&gt; parse_expr(parser, 5)
+ERROR: ParseError: Using default `==` comparison, but parser `3` ≠ value `5`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/1d299783cc3b20125156b32365084f4c52b899c0/src/expr_parsers_core.jl#LL147-L169">source</a></section></article><h2 id="Meta-ExprParser"><a class="docs-heading-anchor" href="#Meta-ExprParser">Meta ExprParser</a><a id="Meta-ExprParser-1"></a><a class="docs-heading-anchor-permalink" href="#Meta-ExprParser" title="Permalink"></a></h2><ul><li><a href="#ExprParsers.Named"><code>Named</code></a></li><li><a href="#ExprParsers.Indexed"><code>Indexed</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Named" href="#ExprParsers.Named"><code>ExprParsers.Named</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Named{:MyTag}(parser)</code></pre><p>Construct an ExprParser with a type identified by <code>MyTag</code>. This is helpful if you have multiple versions of a similar parser and would like to easily distinguish them during dispatch.</p><p>The <code>Named{:MyTag}</code> wrapper is also passed on to the parsed value.</p><p>Works with any ExprParser, also custom defined ones.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser1 = EP.Named{:simple}(EP.Assignment(left = EP.anysymbol));
+
+julia&gt; parser2 = EP.Named{:any}(EP.Assignment());
+
+julia&gt; parse_expr(parser1, :(a = 4))
+ExprParsers.Named{:simple,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:a, right=4))
+julia&gt; parse_expr(parser1, :(a.b = 4))
+ERROR: ParseError: Expected type `Symbol`, got `a.b` of type `Expr`.
+julia&gt; parse_expr(parser2, :(a = 4))
+ExprParsers.Named{:any,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:a, right=4))
+julia&gt; parse_expr(parser2, :(a.b = 4))
+ExprParsers.Named{:any,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:(a.b), right=4))</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L27">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Indexed" href="#ExprParsers.Indexed"><code>ExprParsers.Indexed</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Indexed(func_expecting_dict_as_only_argument)</code></pre><p>Constructs an ExprParser where you can access dedicated subexpressions/subparsers via Dictionary lookup. Most importantly, the shortcuts are preserved during <code>parse_expr()</code>.</p><p>Works with any ExprParser, also custom defined ones.</p><p>Concretely, here a toy example</p><pre><code class="language-julia">EP.Indexed() do dict
   EP.Expr(quote
     a = $(dict[:a] = EP.Isa(Int))
     b = $(dict[:b] = EP.anysymbol)
   end)
-end</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L12">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Macro" href="#ExprParsers.Macro"><code>ExprParsers.Macro</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">@macroname arg1 arg2 ...</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L5">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Macro_Parsed" href="#ExprParsers.Macro_Parsed"><code>ExprParsers.Macro_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">@macroname arg1 arg2 ...</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L5">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Named" href="#ExprParsers.Named"><code>ExprParsers.Named</code></a> — <span class="docstring-category">Type</span></header><section><div><p>identify Parser by Tag</p><p>Named Parsers can be easily identified by Type. The Nametag is also passed to the parsed value.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L4">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.NestedDot" href="#ExprParsers.NestedDot"><code>ExprParsers.NestedDot</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a.b
-fun(T{:hi}).b.c.d.e.f</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L6">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.NestedDot_Parsed" href="#ExprParsers.NestedDot_Parsed"><code>ExprParsers.NestedDot_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a.b
-fun(T{:hi}).b.c.d.e.f</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L6">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Reference" href="#ExprParsers.Reference"><code>ExprParsers.Reference</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a{b, c}</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L6">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Reference_Parsed" href="#ExprParsers.Reference_Parsed"><code>ExprParsers.Reference_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a{b, c}</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L6">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Signature" href="#ExprParsers.Signature"><code>ExprParsers.Signature</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a(b, c::Any)
+end</code></pre><p>As you can see, <code>EP.Indexed</code> is expecting a function which takes a <code>dict</code> as the only argument. It best used with do-notation. The function then needs to return an <code>ExprParser</code>, but can do whatever it wants in principle. Shortcuts are now assigned by just using interpolation syntax <code>$(...)</code> and storing references to subparser into the given <code>dict</code>. For example you see that <code>EP.Isa(Int)</code> is captured as <code>dict[:a]</code> before being used as a subparser.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Indexed() do dict
+         EP.Expr(quote
+           a = $(dict[:a] = EP.Isa(Int))
+           b = $(dict[:b] = EP.anysymbol)
+         end)
+       end;
+
+julia&gt; parser[:a]
+ExprParsers.Isa{Int64}()
+julia&gt; parsed = parse_expr(parser, quote
+         a = 42
+         b = a
+       end);
+
+julia&gt; parsed[:a], parsed[:b]
+(42, :a)
+
+julia&gt; parse_expr(parser, quote
+         a = 42
+         b = :notasymbol
+       end);
+ERROR: ParseError: Expected type `Symbol`, got `:notasymbol` of type `QuoteNode`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L51">source</a></section></article><h2 id="ExprParserWithParsed"><a class="docs-heading-anchor" href="#ExprParserWithParsed">ExprParserWithParsed</a><a id="ExprParserWithParsed-1"></a><a class="docs-heading-anchor-permalink" href="#ExprParserWithParsed" title="Permalink"></a></h2><p>All these ExprParsers have a corresponding <code>..._Parsed</code> object which captures the parsed information. I.e. there is <code>EP.Function</code> and when it is parsed with <code>parse_expr</code> it will return an <code>EP.Function_Parsed</code>.</p><ul><li><a href="#ExprParsers.Expr"><code>Expr</code></a></li><li><a href="#ExprParsers.Block"><code>Block</code></a></li><li><a href="#ExprParsers.Macro"><code>Macro</code></a></li><li><a href="#ExprParsers.Assignment"><code>Assignment</code></a></li><li><a href="#ExprParsers.NestedDot"><code>NestedDot</code></a></li><li><a href="#ExprParsers.Reference"><code>Reference</code></a></li><li><a href="#ExprParsers.Call"><code>Call</code></a></li><li><a href="#ExprParsers.Signature"><code>Signature</code></a></li><li><a href="#ExprParsers.Function"><code>Function</code></a></li><li><a href="#ExprParsers.Type"><code>Type</code></a></li><li><a href="#ExprParsers.TypeRange"><code>TypeRange</code></a></li><li><a href="#ExprParsers.TypeAnnotation"><code>TypeAnnotation</code></a></li><li><a href="#ExprParsers.Arg"><code>Arg</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Expr" href="#ExprParsers.Expr"><code>ExprParsers.Expr</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Expr(head = EP.anything, args = EP.anything)
+EP.Expr(expr; [ignore_linenumbernodes=true])</code></pre><p>It is the most flexible parser, but hence also the least plug-and-play.</p><p>Parses the following</p><pre><code class="language-julia">Base.Expr(head, args...)</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Expr(head = :vect);
+
+julia&gt; parse_expr(parser, :([1,2,3]))
+EP.Expr_Parsed(
+  head = :vect
+  args = Any[1, 2, 3]
+)
+julia&gt; parse_expr(parser, :(f(a) = a))
+ERROR: ParseError: Using default `==` comparison, but parser `:vect` ≠ value `:(=)`.</code></pre><p>Also see <a href="#ExprParsers.Indexed"><code>Indexed</code></a> for an example to combine <code>EP.Indexed</code> with <code>EP.Expr</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L28">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Block" href="#ExprParsers.Block"><code>ExprParsers.Block</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Block(block_expr; [ignore_linenumbernodes = true])
+EP.Block(expr1, expr2, ...; [ignore_linenumbernodes = true])
+EP.Block()</code></pre><p>Helper to parse blocks of code (i.e. <code>expr.head == :block</code>) or a given list of expr respectively.</p><p>The main purpose is to handle linenumbernodes, otherwise it behaves similar to plain Vector of Expr.</p><p>Parses the following</p><pre><code class="language-julia">quote
+  any
+  4
+end
+[:(a = 4), 42, :anyvector]
+(:(a = 4), 42, :or_tuple_of_expr)
+end</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Block(quote
+         $(EP.anything)
+         $(EP.anysymbol)
+         13
+       end);
+
+julia&gt; parse_expr(parser, [:(a = 4), :hi, 13])
+EP.Block_Parsed(
+  exprs = Any[:(a = 4), :hi, 13]
+)
+julia&gt; parse_expr(parser, quote
+         whatever(a) = a
+         asymbol
+         14
+       end)
+ERROR: ParseError: Using default `==` comparison, but parser `13` ≠ value `14`.</code></pre><p>Used within <a href="#ExprParsers.Expr"><code>EP.Expr</code></a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L42">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Macro" href="#ExprParsers.Macro"><code>ExprParsers.Macro</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">Macro(name = EP.anything, args = EP.anything, linenumber = EP.Isa(LineNumberNode))</code></pre><p>Parses the following</p><pre><code class="language-julia">@macroname arg1 arg2 ...</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Macro(name = :mymacro);
+
+julia&gt; parse_expr(parser, :(@mymacro 1 two))
+EP.Macro_Parsed(
+  name       = :mymacro
+  args       = Any[1, :two]
+  linenumber = :(#= none:1 =#)
+)
+julia&gt; parse_expr(parser, :(@anothermacro))
+ERROR: ParseError: Using default `==` comparison, but parser `:mymacro` ≠ value `:anothermacro`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L23">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Assignment" href="#ExprParsers.Assignment"><code>ExprParsers.Assignment</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Assignment(left = EP.anything, right = EP.anything)</code></pre><p>Parses the following</p><pre><code class="language-none">left = right</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Assignment(left = EP.anysymbol)
+EP.Assignment(
+  left  = ExprParsers.Isa{Symbol}()
+  right = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(a = [1,2,3,4]))
+EP.Assignment_Parsed(
+  left  = :a
+  right = :([1, 2, 3, 4])
+)
+julia&gt; parse_expr(parser, :(f(a) = a))
+ERROR: ParseError: Expected type `Symbol`, got `f(a)` of type `Expr`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L26">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.NestedDot" href="#ExprParsers.NestedDot"><code>ExprParsers.NestedDot</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.NestedDot(base = EP.anything, properties = EP.anything)</code></pre><p>Parses the following</p><pre><code class="language-julia">a.b
+fun(T{:hi}).b.c.d.e.f</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers; using Base.Iterators
+
+julia&gt; parser = EP.NestedDot(
+         properties = EP.Iterator(repeated(
+           EP.SatisfiesPredicate(&quot;It should start with &#39;a&#39;.&quot;) do x
+             startswith(string(x), &quot;a&quot;)
+           end
+         ))
+       );
+
+julia&gt; parse_expr(parser, :(fun(T{:hi}).aone.atwo.athree))
+EP.NestedDot_Parsed(
+  base       = :(fun(T{:hi}))
+  properties = [:aone, :atwo, :athree]
+)
+julia&gt; parse_expr(parser, :(fun(T{:hi}).aone.btwo.athree))
+ERROR: ParseError: Predicate `#1` returned false on expr `btwo`. It should start with &#39;a&#39;.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L29">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Reference" href="#ExprParsers.Reference"><code>ExprParsers.Reference</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Reference(name = EP.anything, curlies = EP.anything)</code></pre><p>Parses the following</p><pre><code class="language-julia">a
+a{b, c}</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Reference(curlies = [:A, EP.anysymbol])
+EP.Reference(
+  name    = ExprParsers.Isa{Any}()
+  curlies = Any[:A, ExprParsers.Isa{Symbol}()]
+)
+julia&gt; parse_expr(parser, :(SomeType{A, B}))
+EP.Reference_Parsed(
+  name    = :SomeType
+  curlies = [:A, :B]
+)
+julia&gt; parse_expr(parser, :(SomeType{A}))
+ERROR: ParseError: length(parser) == length(values) = false
+  length(parser) = 2
+  parser = Any[:A, ExprParsers.Isa{Symbol}()]
+  length(values) = 1
+  values = Any[:A]
+julia&gt; parse_expr(parser, :(SomeType{B, C}))
+ERROR: ParseError: Using default `==` comparison, but parser `:A` ≠ value `:B`.
+julia&gt; parse_expr(parser, :(SomeType{A, 1}))
+ERROR: ParseError: Expected type `Symbol`, got `1` of type `Int64`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L34">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Call" href="#ExprParsers.Call"><code>ExprParsers.Call</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Call(
+  name = EP.anything,
+  curlies = EP.anything,
+  args = EP.anything,
+  kwargs = EP.anything)</code></pre><p>Parses the following</p><pre><code class="language-julia">a()
+a(b, c)
+a{b, c}(d, e)
+a{b, c}(d, e, f = 1; g = :two)</code></pre><p>Note that all keyword arguments are collected into the <code>kwargs</code> field, also those before <code>;</code>, corresponding to standard julia call semantics.</p><p>Note that keyword arguments are represented using the default Expr representation <code>Expr(:kw, :key, &quot;value&quot;)</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Call(name = :myfunc)
+EP.Call(
+  name    = :myfunc
+  curlies = ExprParsers.Isa{Any}()
+  args    = ExprParsers.Isa{Any}()
+  kwargs  = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(myfunc(a, b, c = 1; d = :hi)))
+EP.Call_Parsed(
+  name    = :myfunc
+  curlies = Any[]
+  args    = Any[:a, :b]
+  kwargs  = Any[:($(Expr(:kw, :c, 1))), :($(Expr(:kw, :d, :(:hi))))]
+)
+julia&gt; parse_expr(parser, :(anotherfunc(a, b, c = 1; d = :hi)))
+ERROR: ParseError: Using default `==` comparison, but parser `:myfunc` ≠ value `:anotherfunc`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L42">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Signature" href="#ExprParsers.Signature"><code>ExprParsers.Signature</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Signature(
+  name = EP.anything,
+  curlies = EP.anything,
+  args = EP.anything,
+  kwargs = EP.anything,
+  wheres = EP.anything)</code></pre><p>Similar to <a href="#ExprParsers.Call"><code>EP.Call</code></a> but with a couple of differences</p><ul><li>extra <code>wheres</code></li><li>the <code>name</code> field might stay empty</li><li><code>args</code> can also contain <code>Expr(:kw, key, value)</code> values (corresponds to default value syntax, which is only available in signatures)</li></ul><p>Parses the following:</p><pre><code class="language-julia">a(b, c::Any)
 a(b::B, c) where B
-(::Any, c::C) where {C &lt;: Number}</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Signature_Parsed" href="#ExprParsers.Signature_Parsed"><code>ExprParsers.Signature_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a(b, c::Any)
-a(b::B, c) where B
-(::Any, c::C) where {C &lt;: Number}</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Type" href="#ExprParsers.Type"><code>ExprParsers.Type</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
+(::Any, c::C) where {C &lt;: Number}
+f(::Any, c::C, d::Int=1; e=true) where {C &lt;: Number}</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Signature()
+EP.Signature(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  args    = ExprParsers.Isa{Any}()
+  kwargs  = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(f{T}(a::T) where T))
+EP.Signature_Parsed(
+  name    = :f
+  curlies = Any[:T]
+  args    = Any[:(a::T)]
+  kwargs  = Any[]
+  wheres  = Any[:T]
+)
+julia&gt; parse_expr(parser, :((a, b::T) where T))
+EP.Signature_Parsed(
+  name    = nothing
+  curlies = Any[]
+  args    = Any[:a, :(b::T)]
+  kwargs  = Any[]
+  wheres  = Any[:T]
+)
+julia&gt; parse_expr(parser, :(f(a, b::T, c::Any=3; d=true) where T))
+EP.Signature_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = Any[:a, :(b::T), :($(Expr(:kw, :(c::Any), 3)))]
+  kwargs  = Any[:($(Expr(:kw, :d, true)))]
+  wheres  = Any[:T]
+)
+julia&gt; parse_expr(parser, :(f(a) = a))
+ERROR: ParseError: expr.head in (:where, :call, :tuple) = false
+  expr.head = :(=)
+  expr = :(f(a) = begin
+          #= none:1 =#
+          a
+      end)
+  (:where, :call, :tuple) = (:where, :call, :tuple)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L67">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Function" href="#ExprParsers.Function"><code>ExprParsers.Function</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Function(
+  name = EP.anything,
+  curlies = EP.anything,
+  args = EP.anything,
+  kwargs = EP.anything,
+  wheres = EP.anything,
+  body = EP.anything)</code></pre><p>Parses full functions. For instance</p><pre><code class="language-julia">function a(b, c) where B
+  d
+end
+a(b, c) = d</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Function(
+         args = [EP.anything for i in 1:3],
+       )
+EP.Function(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  args    = [ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}()]
+  kwargs  = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+  body    = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(f(a, b, c) = a + b + c))
+EP.Function_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = [:a, :b, :c]
+  kwargs  = Any[]
+  wheres  = Any[]
+  body    = quote
+    #= none:1 =#
+    a + b + c
+end
+)
+julia&gt; parse_expr(parser, :(
+         function g(a)
+           a
+         end
+       ))
+ERROR: ParseError: length(parser) == length(values) = false
+  length(parser) = 3
+  parser = [ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}(), ExprParsers.Isa{Any}()]
+  length(values) = 1
+  values = Any[:a]
+julia&gt; parse_expr(parser, :a)
+ERROR: ParseError: ExprParsers.Function has no `parse_expr` method defined to capture Type `Symbol`. Got: `a`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L57">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Type" href="#ExprParsers.Type"><code>ExprParsers.Type</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Type(name = EP.anything, curlies = EP.anything, wheres = EP.anything)</code></pre><p>Parses the following:</p><pre><code class="language-julia">a
 a{b, c}
-a{d} where d</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.TypeAnnotation" href="#ExprParsers.TypeAnnotation"><code>ExprParsers.TypeAnnotation</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a::B
-::B</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.TypeAnnotation_Parsed" href="#ExprParsers.TypeAnnotation_Parsed"><code>ExprParsers.TypeAnnotation_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a::B
-::B</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.TypeRange" href="#ExprParsers.TypeRange"><code>ExprParsers.TypeRange</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">TypeVar &gt;: LowerBound
+a{d} where d</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Type()
+EP.Type(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(Array{T, 2} where T))
+EP.Type_Parsed(
+  name    = :Array
+  curlies = Any[:T, 2]
+  wheres  = Any[:T]
+)
+julia&gt; parse_expr(parser, :(f(1,2)))
+ERROR: ParseError: Cannot parse expr `f(1, 2)` as reference: expr.head `call` not in `[:curly, :.]`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L30">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.TypeRange" href="#ExprParsers.TypeRange"><code>ExprParsers.TypeRange</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.TypeRange(lb = EP.anything, name = EP.anything, ub = EP.anything)</code></pre><p>Note: Construct with <code>typevar = EP.anysymbol</code> to guarantee that only plain symbols can be used as type variable.</p><p>Parses the following.</p><pre><code class="language-none">TypeVar &gt;: LowerBound
 TypeVar &lt;: UpperBound
-LowerBound &lt;: TypeVar &lt;: UpperBound</code></pre><p>Note: Construct with <code>typevar = anysymbol</code> to guarantee that only plain symbols can be used as type variable</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L9">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.TypeRange_Parsed" href="#ExprParsers.TypeRange_Parsed"><code>ExprParsers.TypeRange_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">TypeVar &gt;: LowerBound
-TypeVar &lt;: UpperBound
-LowerBound &lt;: TypeVar &lt;: UpperBound</code></pre><p>Note: Construct with <code>typevar = anysymbol</code> to guarantee that only plain symbols can be used as type variable</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L9">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Type_Parsed" href="#ExprParsers.Type_Parsed"><code>ExprParsers.Type_Parsed</code></a> — <span class="docstring-category">Type</span></header><section><div><p>parses:</p><pre><code class="language-none">a
-a{b, c}
-a{d} where d</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/44fa15b1502a45eac76c9017af94332d4557b251/base/#L0-L7">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers._find_object-Tuple{Any,Union{Tuple, Dict, Array{T,1} where T}}" href="#ExprParsers._find_object-Tuple{Any,Union{Tuple, Dict, Array{T,1} where T}}"><code>ExprParsers._find_object</code></a> — <span class="docstring-category">Method</span></header><section><div><p>return list of keys/symbols to access a reference or nothing if no is found</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/expr_parsers_meta.jl#LL71-L73">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers._get_struct_name-Tuple{Expr}" href="#ExprParsers._get_struct_name-Tuple{Expr}"><code>ExprParsers._get_struct_name</code></a> — <span class="docstring-category">Method</span></header><section><div><p>returns name of struct definition as symbol</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/syntax.jl#LL60-L62">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers._parsed_struct_from_parser_struct-Tuple{Expr,Any}" href="#ExprParsers._parsed_struct_from_parser_struct-Tuple{Expr,Any}"><code>ExprParsers._parsed_struct_from_parser_struct</code></a> — <span class="docstring-category">Method</span></header><section><div><ul><li>makes it mutable</li><li>adds SUFFIX to struct name</li><li>deletes all default values</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/syntax.jl#LL68-L72">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.parse_expr-Tuple{Any,Any}" href="#ExprParsers.parse_expr-Tuple{Any,Any}"><code>ExprParsers.parse_expr</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">parse_expr(parser, value)</code></pre><p>Match parser against a value, will throw ParseError if the parser does not match.</p><p>Defaults to comparing with <code>==</code>, if matches, will return the value. Parsers will be called instead and return their parsed value.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/ExprParsers.jl#LL29-L37">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.parse_expr-Tuple{ExprParsers.ExprParserWithParsed}" href="#ExprParsers.parse_expr-Tuple{ExprParsers.ExprParserWithParsed}"><code>ExprParsers.parse_expr</code></a> — <span class="docstring-category">Method</span></header><section><div><p>All ExprParserWithParsed have a common parse_expr method, namely that all struct fields are given directly as keyword arguments.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/expr_parsers_with_parsed.jl#LL7-L9">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.to_expr-Tuple{Any}" href="#ExprParsers.to_expr-Tuple{Any}"><code>ExprParsers.to_expr</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">to_expr(parsed)</code></pre><p>Converts parsed information back to Expr.</p><p>Defaults to returning same value, however if something knows about how it can be translated back, just overload the function.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/ExprParsers.jl#LL54-L61">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.@passert-Tuple{Any,Vararg{Any,N} where N}" href="#ExprParsers.@passert-Tuple{Any,Vararg{Any,N} where N}"><code>ExprParsers.@passert</code></a> — <span class="docstring-category">Macro</span></header><section><div><pre><code class="language-julia">@passert cond [text]</code></pre><p>Throw an <a href="@ref"><code>ParseError</code></a> if <code>cond</code> is <code>false</code>. Preferred syntax for writing assertions. Message <code>text</code> is optionally displayed upon assertion failure.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; @passert iseven(3) &quot;3 is an odd number!&quot;
-ERROR: ParseError: 3 is an odd number!
-julia&gt; @passert isodd(3) &quot;What even are numbers?&quot;</code></pre><p>Adapted from Base.@assert</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/schlichtanders/ExprParsers.jl/blob/b63abadfde1666c6b6e00778d0e140d2d09dd48b/src/exceptions.jl#LL26-L39">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../manual/">« Manual</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 28 July 2020 15:51">Tuesday 28 July 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+LowerBound &lt;: TypeVar &lt;: UpperBound</code></pre><p><strong>Examples</strong></p><pre><code class="language-none">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.TypeRange(name = EP.anysymbol)
+EP.TypeRange(
+  lb   = ExprParsers.Isa{Any}()
+  name = ExprParsers.Isa{Symbol}()
+  ub   = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(Int &lt;: T &lt;: Number))
+EP.TypeRange_Parsed(
+  lb   = :Int
+  name = :T
+  ub   = :Number
+)
+julia&gt; parse_expr(parser, :(T &lt;: Number))
+EP.TypeRange_Parsed(
+  lb   = Union{}
+  name = :T
+  ub   = :Number
+)
+julia&gt; parse_expr(parser, :(Int &lt;: 4)) # CAUTION: when using single `&lt;:`, the order is decisive!
+EP.TypeRange_Parsed(
+  lb   = Union{}
+  name = :Int
+  ub   = 4
+)
+julia&gt; parse_expr(parser, :(4 &gt;: Int))
+ERROR: ParseError: Expected type `Symbol`, got `4` of type `Int64`.
+julia&gt; parse_expr(parser, :(4 &lt;: Int))
+ERROR: ParseError: Expected type `Symbol`, got `4` of type `Int64`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L45">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.TypeAnnotation" href="#ExprParsers.TypeAnnotation"><code>ExprParsers.TypeAnnotation</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.TypeAnnotation(name = EP.anything, type = EP.anything)</code></pre><p>Parses the following</p><pre><code class="language-julia">a
+a::B
+::B</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.TypeAnnotation(type = :Int)
+EP.TypeAnnotation(
+  name = ExprParsers.Isa{Any}()
+  type = :Int
+)
+julia&gt; parse_expr(parser, :(::Int))
+EP.TypeAnnotation_Parsed(
+  name = nothing
+  type = :Int
+)
+julia&gt; parse_expr(parser, :(a::Int))
+EP.TypeAnnotation_Parsed(
+  name = :a
+  type = :Int
+)
+julia&gt; parse_expr(parser, :(a::String))
+ERROR: ParseError: Using default `==` comparison, but parser `:Int` ≠ value `:String`.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L32">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ExprParsers.Arg" href="#ExprParsers.Arg"><code>ExprParsers.Arg</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">EP.Arg(name = EP.anything, type = EP.anything, default = EP.anything)</code></pre><p>A missing default value is indicated by the special variable <code>EP.nodefault</code> which is the unique instance of the singleton type <code>EP.NoDefault</code>.</p><p>Parses the following</p><pre><code class="language-julia">a
+a::B
+::B
+a = c  # only :($(Expr(:kw, :a, :c))), not plain :(a = c)
+a::B = c  # only :($(Expr(:kw, :(a::B), :c))), not plain :(a::B = c)</code></pre><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; using ExprParsers
+
+julia&gt; parser = EP.Arg()
+EP.Arg(
+  name    = ExprParsers.Isa{Any}()
+  type    = ExprParsers.Isa{Any}()
+  default = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser, :(a::B))
+EP.Arg_Parsed(
+  name    = :a
+  type    = :B
+  default = ExprParsers.NoDefault()
+)
+julia&gt; parse_expr(parser, Expr(:kw, :a, 3))
+EP.Arg_Parsed(
+  name    = :a
+  type    = Any
+  default = 3
+)
+julia&gt; parse_expr(parser, :(a = 3))
+ERROR: ParseError: AnyOf could not parse expr `a = 3` with any of the parsers `(ExprParsers.Isa{Symbol}(), EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}()))`. Arg should either be a Symbol or a TypeAnnotation.
+julia&gt; parse_expr(parser, :(f(a)))
+ERROR: ParseError: AnyOf could not parse expr `f(a)` with any of the parsers `(ExprParsers.Isa{Symbol}(), EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}()))`. Arg should either be a Symbol or a TypeAnnotation.</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaLang/julia/blob/96786e22ccabfdafd073122abb1fb69cea921e17/base/#L0-L43">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../manual/">« Manual</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Sunday 9 August 2020 15:36">Sunday 9 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
