@@ -14,7 +14,7 @@ function parse_expr(parser::ExprParserWithParsed; kw...)
   ExprParsed(typeof(parser))(;kw′...)
 end
 function parse_expr(parser::ExprParserWithParsed, any)
-  throw(ParseError("$(typeof(parser)) has no clause defined to capture Type `$(typeof(any))`. Got: `$any`."))
+  throw(ParseError("$(typeof(parser)) has no `parse_expr` method defined to capture Type `$(typeof(any))`. Got: `$any`."))
 end
 
 # Overwriting show to print content by fields instead of positions.
@@ -84,7 +84,7 @@ Also see [`Indexed`](@ref) for an example to combine `EP.Indexed` with `EP.Expr`
 """
 @exprparser struct Expr
   head = anything
-  args = anything
+  args = anything = []
 end
 function Expr(expr::Base.Expr; ignore_linenumbernodes=true)
   if ignore_linenumbernodes
@@ -235,8 +235,8 @@ ERROR: ParseError: Using default `==` comparison, but parser `:mymacro` ≠ valu
 """
 @exprparser struct Macro
   name = anything
-  args = anything
-  linenumber = Isa(LineNumberNode)
+  args = anything = []
+  linenumber = Isa(LineNumberNode) = LineNumberNode(0)
 end
 to_expr(parsed::Macro_Parsed) = Base.Expr(:macrocall, Base.Symbol("@", parsed.name), parsed.linenumber, parsed.args...)
 function parse_expr(parser::Macro, expr::Base.Expr)
@@ -383,7 +383,7 @@ ERROR: ParseError: Expected type `Symbol`, got `1` of type `Int64`.
 """
 @exprparser struct Reference
   name = anything
-  curlies = anything
+  curlies = anything = []
 end
 
 parse_expr(parser::Reference, expr::Base.Symbol) = parse_expr(parser, name = expr, curlies = [])
@@ -454,9 +454,9 @@ ERROR: ParseError: Using default `==` comparison, but parser `:myfunc` ≠ value
 """
 @exprparser struct Call
   name = anything
-  curlies = anything
-  args = anything
-  kwargs = anything
+  curlies = anything = []
+  args = anything = []
+  kwargs = anything = []
 end
 
 function parse_expr(parser::Call, expr::Base.Expr)
@@ -470,7 +470,9 @@ function _extract_args_kwargs__collect_all_kw_into_kwargs(expr_args)
   args = []
   kwargs = []
 
-  otherargs, parameters = if isexpr(expr_args[1], :parameters)
+  otherargs, parameters = if isempty(expr_args)
+    [], []
+  elseif isexpr(expr_args[1], :parameters)
     expr_args[2:end], expr_args[1].args
   else
     expr_args, []
@@ -575,11 +577,11 @@ ERROR: ParseError: expr.head in (:where, :call, :tuple) = false
 ```
 """
 @exprparser struct Signature
-  name = anything
-  curlies = anything
-  args = anything
-  kwargs = anything
-  wheres = anything
+  name = anything = nothing
+  curlies = anything = []
+  args = anything = []
+  kwargs = anything = []
+  wheres = anything = []
 end
 
 function parse_expr(parser::Signature, expr::Base.Expr)
@@ -602,7 +604,9 @@ function parse_expr(parser::Signature, expr::Base.Expr)
 end
 
 function _extract_args_kwargs__no_processing(expr_args)
-  args, kwargs = if isexpr(expr_args[1], :parameters)
+  args, kwargs = if isempty(expr_args)
+    [], []
+  elseif isexpr(expr_args[1], :parameters)
     expr_args[2:end], expr_args[1].args
   else
     expr_args, []
@@ -710,16 +714,16 @@ ERROR: ParseError: length(parser) == length(values) = false
   length(values) = 1
   values = Any[:a]
 julia> parse_expr(parser, :a)
-ERROR: ParseError: ExprParsers.Function has no clause defined to capture Type `Symbol`. Got: `a`.
+ERROR: ParseError: ExprParsers.Function has no `parse_expr` method defined to capture Type `Symbol`. Got: `a`.
 ```
 """
 @exprparser struct Function
-  name = anything
-  curlies = anything
-  args = anything
-  kwargs = anything
-  wheres = anything
-  body = anything
+  name = anything = nothing
+  curlies = anything = []
+  args = anything = []
+  kwargs = anything = []
+  wheres = anything = []
+  body = anything = nothing
 end
 
 function parse_expr(parser::Function, expr::Base.Expr)
@@ -783,8 +787,8 @@ ERROR: ParseError: Cannot parse expr `f(1, 2)` as reference: expr.head `call` no
 """
 @exprparser struct Type
   name = anything
-  curlies = anything
-  wheres = anything
+  curlies = anything = []
+  wheres = anything = []
 end
 
 parse_expr(parser::Type, expr::Base.Symbol) = parse_expr(parser, name = expr, curlies = [], wheres = [])
@@ -859,11 +863,12 @@ ERROR: ParseError: Expected type `Symbol`, got `4` of type `Int64`.
 """
 @exprparser struct TypeRange
   # naming is analog to Base.TypeVar
-  lb = anything
+  lb = anything = Union{}
   name = anything
-  ub = anything
+  ub = anything = Any
 end
 
+parse_expr(parser::TypeRange, expr::Base.Symbol) = parse_expr(parser, lb = Union{}, name = expr, ub = Any)
 function parse_expr(parser::TypeRange, expr::Base.Expr)
   if expr.head == :>:
     parse_expr(parser, lb = expr.args[2], name = expr.args[1], ub = Any)
@@ -995,16 +1000,12 @@ ERROR: ParseError: AnyOf could not parse expr `f(a)` with any of the parsers `(E
 @exprparser struct Arg
   # name == nothing will be treated as anonymous type annotation
   name = anything
-  type = anything
-  default = anything
+  type = anything = Any
+  default = anything = nodefault
 end
 
 function parse_expr(parser::Arg, expr::Base.Symbol)
-  # don't use the parser for `default`
-  Arg_Parsed(
-    name = parse_expr(parser.name, expr),
-    type = parse_expr(parser.type, Any),
-    default = nodefault)
+  parse_expr(parser, name = expr, type = Any, default = nodefault)
 end
 
 const _arg_left_handside_parser = AnyOf(anysymbol, TypeAnnotation(),
@@ -1027,11 +1028,7 @@ function parse_expr(parser::Arg, expr::Base.Expr)
       f(symbol::Base.Symbol) = symbol, Any
       f(parsed::TypeAnnotation_Parsed) = parsed.name, parsed.type
     end
-    # don't use the parser for `default`
-    Arg_Parsed(
-      name = parse_expr(parser.name, name),
-      type = parse_expr(parser.type, type),
-      default = nodefault)
+    parse_expr(parser, name = name, type = type, default = nodefault)
   end
 end
 
