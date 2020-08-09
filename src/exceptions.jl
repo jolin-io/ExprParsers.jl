@@ -1,6 +1,6 @@
 
 """
-    ParseError
+    EP.ParseError
 
 Special Exception Type to indicate that some parsing failed.
 """
