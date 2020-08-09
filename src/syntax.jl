@@ -4,16 +4,16 @@ const SUFFIX = "_Parsed"
 """
 ```julia
 EP.@exprparser struct MySymbol
-  symbol = anything
+  symbol = EP.anything = :default_parsed_value
 end
 ```
 is transformed to
 ```julia
-StructEquality.@def_structequal Base.@kwdef struct MySymbol <: EP.ExprParserWithParsed
+Base.@kwdef struct MySymbol <: EP.ExprParserWithParsed
   symbol = anything
 end
-StructEquality.@def_structequal Base.@kwdef mutable struct MySymbol_Parsed{T} <: EP.ExprParsed
-  symbol
+Base.@kwdef mutable struct MySymbol_Parsed{T} <: EP.ExprParsed
+  symbol = :default_parsed_value
 end
 EP.ExprParsed(::Base.Type{MySymbol}) = MySymbol_Parsed
 ```
@@ -27,7 +27,7 @@ It defines the basics for an usual ExprParser, namely
 - a mapping from the `ExprParser` to the `ExprParsed`
 
 
-Additionally, the created MySymbol Parser supports the following parsing syntax
+Additionally, the created MySymbol Parser supports the following default `parse_expr` functionality
 ```julia
 parser = MySymbol()
 parse_expr(parser, symbol = :hi)
@@ -60,20 +60,21 @@ function EP.to_expr(parsed::MySymbol_Parsed)
 end
 ```
 """
-macro exprparser(parser_struct_expr)
+macro exprparser(combined_struct_expr)
   # TODO performance improvement?: add typeparameters for every field (?)
-  if parser_struct_expr.head == :block
-    parser_struct_expr = parser_struct_expr.args[1]
+  if combined_struct_expr.head == :block
+    combined_struct_expr = combined_struct_expr.args[1]
   end
-
-  @assert parser_struct_expr.head == :struct "expecting struct"
-  @assert parser_struct_expr.args[1] == false "expecting immutable struct as parser"
-  parser_struct_name::Base.Symbol = _get_struct_name(parser_struct_expr)
-  parsed_struct_name = Base.Symbol(parser_struct_name, SUFFIX)
-
-  parsed_struct_expr = _parsed_struct_from_parser_struct(parser_struct_expr, parsed_struct_name)
-  @assert(!isa(parser_struct_expr.args[2], Base.Expr) || parser_struct_expr.args[2].head != :(<:),
+  @assert combined_struct_expr.head == :struct "expecting struct"
+  @assert combined_struct_expr.args[1] == false "expecting immutable struct as parser"
+  @assert(!isa(combined_struct_expr.args[2], Base.Expr) || combined_struct_expr.args[2].head != :(<:),
     "please ommit the inheritance notation, it will be provided by the macro")
+
+  parser_struct_name::Base.Symbol = _get_struct_name(combined_struct_expr)
+  parser_struct_expr = _parser_struct_from_combined_struct(combined_struct_expr, parser_struct_name)
+
+  parsed_struct_name = Base.Symbol(parser_struct_name, SUFFIX)
+  parsed_struct_expr = _parsed_struct_from_combined_struct(combined_struct_expr, parsed_struct_name)
 
   # add inheritance
   parser_struct_expr.args[2] = :($(parser_struct_expr.args[2]) <: ExprParsers.ExprParserWithParsed)
@@ -95,26 +96,51 @@ _get_struct_name(::Val{:struct}, args) = _get_struct_name(args[2])
 _get_struct_name(::Union{Val{:(<:)}, Val{:(::)}, Val{:curly}}, args) = _get_struct_name(args[1])
 _get_struct_name(symbol::Base.Symbol) = symbol
 
+
+_rename_struct_name(newname, expr::Base.Expr) = _rename_struct_name(newname, Val{expr.head}(), expr.args)
+_rename_struct_name(newname, symbol::Base.Symbol) = newname
+_rename_struct_name(newname, any) = any
+_rename_struct_name(newname, head::Union{Val{:(<:)}, Val{:(::)}, Val{:curly}}, args) = Base.Expr(get(head), _rename_struct_name(newname, args[1]), args[2:end]...)
+_rename_struct_name(newname, ::Val{:struct}, args) = _rename_struct_name(newname, args[2])
+
 """
 - makes it mutable
 - adds SUFFIX to struct name
 - deletes all default values
 """
-function _parsed_struct_from_parser_struct(struct_expr::Base.Expr, newname)
+function _parser_struct_from_combined_struct(struct_expr::Base.Expr, newname)
   @assert struct_expr.head == :struct
 
-  _h(expr::Base.Expr) = _h(Val{expr.head}(), expr.args)
-  _h(::Val{:struct}, args) = Base.Expr(:struct, true, _h_name(args[2]), _h_default(args[3]))
-  # rename struct name with given newname
-  _h_name(expr::Base.Expr) = _h_name(Val{expr.head}(), expr.args)
-  _h_name(symbol::Base.Symbol) = newname
-  _h_name(any) = any
-  _h_name(head::Union{Val{:(<:)}, Val{:(::)}, Val{:curly}}, args) = Base.Expr(get(head), _h_name(args[1]), args[2:end]...)
-  # delete default arguments
-  _h_default(expr::Base.Expr) = _h_default(expr, Val{expr.head}(), expr.args)
-  _h_default(any) = any
-  _h_default(expr, head::Val{:block}, args) = Base.Expr(:block, _h_default.(args)...)
-  _h_default(expr, head::Val{:(=)}, args) = args[1] isa Base.Symbol ? args[1] : expr
+  # take first default value and ommit a possible second one
+  _default(expr::Base.Expr) = _default(expr, Val{expr.head}(), expr.args)
+  _default(any) = any
+  _default(expr, head::Val{:block}, args) = Base.Expr(:block, _default.(args)...)
+  _default(expr, head::Val{:(=)}, args) = _default_assignment(expr, args[1], args[2])
+  _default_assignment(expr, a, b) = expr # if there is no double assignment, but hence only a single, we take the single
+  _default_assignment(expr, a, b::Base.Expr) = _default_assignment(expr, a, Val(b.head), b.args)
+  _default_assignment(expr, a, head::Val{:(=)}, bargs) = :($a = $(bargs[1]))  # if there are two assignments, take the first
+  _default_assignment(expr, a, head, bargs) = expr  # if there is only one assignment, take it
 
-  _h(struct_expr)
+  Base.Expr(:struct, true, _rename_struct_name(newname, struct_expr.args[2]), _default(struct_expr.args[3]))
+end
+
+"""
+- makes it mutable
+- adds SUFFIX to struct name
+- deletes all default values
+"""
+function _parsed_struct_from_combined_struct(struct_expr::Base.Expr, newname)
+  @assert struct_expr.head == :struct
+
+  # take first default value and ommit a possible second one
+  _default(expr::Base.Expr) = _default(expr, Val{expr.head}(), expr.args)
+  _default(any) = any
+  _default(expr, head::Val{:block}, args) = Base.Expr(:block, _default.(args)...)
+  _default(expr, head::Val{:(=)}, args) = _default_assignment(expr, args[1], args[2])
+  _default_assignment(expr, a, b) = a # if there is no double assignment, but hence only a single, we take none
+  _default_assignment(expr, a, b::Base.Expr) = _default_assignment(expr, a, Val(b.head), b.args)
+  _default_assignment(expr, a, head::Val{:(=)}, bargs) = :($a = $(bargs[2]))  # if there are two assignments, take the second
+  _default_assignment(expr, a, head, bargs) = a  # if there is only one assignment, we take none
+
+  Base.Expr(:struct, true, _rename_struct_name(newname, struct_expr.args[2]), _default(struct_expr.args[3]))
 end
