@@ -66,6 +66,9 @@ end
     test_closure(parser, args_expr)
     test_closure(parser, kwargs_expr)
   end
+
+  parsed = EP.Arg_Parsed(name = :a)
+  @test parse_expr(EP.Arg(), to_expr(parsed)) == parsed
 end
 
 @testset "Assignment" begin
@@ -77,6 +80,9 @@ end
   test_closure(parser, :(a::Int = 4))
 
   @test_throws EP.ParseError parse_expr(parser, :(a::Int))
+
+  parsed = EP.Assignment_Parsed(left = :left, right = :right)
+  @test parse_expr(EP.Assignment(), to_expr(parsed)) == parsed
 end
 
 
@@ -91,6 +97,9 @@ end
   test_closure(parser, :(f{A, B}(a, b, c...; d...)))
 
   @test_throws EP.ParseError parse_expr(parser, :(a = 4))
+
+  parsed = EP.Call_Parsed(name = :f)
+  @test parse_expr(EP.Call(), to_expr(parsed)) == parsed
 end
 
 @testset "Expr" begin
@@ -178,6 +187,9 @@ end
   @test_throws EP.ParseError parse_expr(parser, :(
     f = 5
   ))
+
+  parsed = EP.Signature_Parsed()
+  @test parse_expr(EP.Signature(), to_expr(parsed)) == parsed
 end
 
 @testset "Function" begin
@@ -221,6 +233,9 @@ end
   @test_throws EP.ParseError parse_expr(parser, :(
     f = 5
   ))
+
+  parsed = EP.Function_Parsed()
+  @test parse_expr(EP.Function(), to_expr(parsed)) == parsed
 end
 
 
@@ -231,6 +246,9 @@ end
   @test parsed.name == :mymacro
   @test parsed.args == [:whatever, 3]
   test_closure(parser, expr)
+
+  parsed = EP.Macro_Parsed(name = :mymcaro)
+  @test parse_expr(EP.Macro(), to_expr(parsed)) == parsed
 end
 
 @testset "NestedDot" begin
@@ -242,6 +260,9 @@ end
   test_closure(parser, expr)
 
   @test_throws EP.ParseError parse_expr(parser, :(A{hi}))
+
+  parsed = EP.NestedDot_Parsed(base = :a, properties = [:b, :c])
+  @test parse_expr(EP.NestedDot(), to_expr(parsed)) == parsed
 end
 
 @testset "Reference" begin
@@ -266,6 +287,9 @@ end
   test_closure(parser, expr)
 
   @test_throws EP.ParseError parse_expr(parser, :(f(a, b)))
+
+  parsed = EP.Reference_Parsed(name = :a)
+  @test parse_expr(EP.Reference(), to_expr(parsed)) == parsed
 end
 
 
@@ -296,6 +320,9 @@ end
   test_closure(parser, expr)
 
   @test_throws EP.ParseError parse_expr(parser, :(f(a, b)))
+
+  parsed = EP.Type_Parsed(name = :a)
+  @test parse_expr(EP.Type(), to_expr(parsed)) == parsed
 end
 
 @testset "TypeAnnotation" begin
@@ -311,6 +338,9 @@ end
   test_closure(parser, expr)
 
   @test_throws EP.ParseError parse_expr(parser, :a)
+
+  parsed = EP.TypeAnnotation_Parsed(name = :a, type = Any)
+  @test parse_expr(EP.TypeAnnotation(), to_expr(parsed)) == parsed
 end
 
 
@@ -334,5 +364,8 @@ end
   @test parse_expr(parser, expr).ub == :Any
   test_closure(parser, expr)
 
-  @test_throws EP.ParseError parse_expr(parser, :a)
+  @test_throws EP.ParseError parse_expr(parser, :(a = 4))
+
+  parsed = EP.TypeRange_Parsed(name = :T)
+  @test parse_expr(EP.TypeRange(), to_expr(parsed)) == parsed
 end
