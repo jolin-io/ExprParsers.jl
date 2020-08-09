@@ -40,6 +40,8 @@ function parse_expr(parser::Named{Name}, expr) where Name
 end
 to_expr(parsed::Named) = to_expr(parsed.value)
 
+Base.getindex(named::Named) = named.value
+
 
 @doc raw"""
     EP.Indexed(func_expecting_dict_as_only_argument)
