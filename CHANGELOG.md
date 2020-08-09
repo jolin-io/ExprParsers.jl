@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2020-08-05
 ### Added
 - extensive docstring documentation
+- extensive example manual on how to use ExprParsers in practice
 - GithubActions for CI, Codecov
 - Changelog
 - License
+- added broadcasting for ExprParsers
+- added `Base.getindex` for Named in order to enable `named[]` as a shorter and maybe more intuitive alternative to `named.value`.
 
 ### Changed
 - minimized exports to only export `EP`, `@passert`, `parse_expr`, `to_expr`
@@ -20,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `EP.Signature` no longer skips the first argument in anonymous function signatures
+- `EP.Args` now also applies `default`-sub-parser to `nodefault` value.
 
 ## [0.1.0] - 2020-05-01
 initial release
