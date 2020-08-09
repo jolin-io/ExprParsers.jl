@@ -4,8 +4,11 @@ using Documenter
 
 @test isempty(detect_ambiguities(ExprParsers))
 
-@testset "doctest" begin
-  doctest(ExprParsers)
+# apparently the output of different kinds of Base.Expr change quite a lot between julia versions 
+if v"1.4" <= VERSION < v"1.5"
+  @testset "doctest" begin
+    doctest(ExprParsers)
+  end
 end
 
 """
