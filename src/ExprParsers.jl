@@ -11,6 +11,11 @@ The main interface encompass just three concepts, which seamlessly interact with
 module ExprParsers
 export EP, @passert, parse_expr, to_expr
 
+"""
+    EP = ExprParsers
+
+Short alias for the `ExprParsers` package.
+"""
 const EP = ExprParsers
 
 using Compat
@@ -94,6 +99,11 @@ to_expr(a::Base.Expr) = Base.Expr(a.head, to_expr(a.args)...)
 All parsers in the `ExprParsers` package inherit from this type.
 """
 abstract type ExprParser end
+
+# we support broadcasting, a ExprParser is always like a single value
+Base.length(::ExprParser) = 1
+Base.iterate(parser::ExprParser) = parser, nothing
+Base.iterate(::ExprParser, ::Nothing) = nothing
 
 """
     EP.ExprParserWithParsed
