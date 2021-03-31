@@ -212,7 +212,7 @@ end
 # -----
 
 """
-    Macro(name = EP.anything, args = EP.anything, linenumber = EP.Isa(LineNumberNode))
+    EP.Macro(name = EP.anything, args = EP.anything, linenumber = EP.Isa(LineNumberNode))
 
 Parses the following
 ```julia
