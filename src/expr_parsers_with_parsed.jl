@@ -197,7 +197,9 @@ function parse_expr_ignore_LineNumberNodes(parsers::Union{Vector, Tuple, Iterato
       next_parser = iterate(parsers_filtered, state)
     end
   end
-  @passert isnothing(next_parser) "While exprs $exprs is exhausted, there is still a left over parser $(next_parser[1]) in the parsers $parsers."
+  if !isa(Base.IteratorSize(parsers), Base.IsInfinite)
+    @passert isnothing(next_parser) "While exprs $exprs is exhausted, there is still a left over parser $(next_parser[1]) in the parsers $parsers."
+  end
   exprs_parsed
 end
 function parse_expr_ignore_LineNumberNodes(parser::Expr, expr::Expr)
