@@ -18,6 +18,15 @@ using ExprParsers
     b
     (1,4,a)
   end)
+
+  parsed = parse_expr(EP.Block(), quote
+    f(a) = A
+    3
+  end)
+  parsed_exprs = filter(x -> !isa(x, LineNumberNode), parsed.exprs)
+  @test parsed_exprs[1].head == :(=)
+  @test parsed_exprs[1].args[1] == :(f(a))
+  @test parsed_exprs[2] == 3
 end
 
 @testset "Arg" begin
