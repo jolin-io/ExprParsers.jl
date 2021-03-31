@@ -71,6 +71,26 @@ end
   @test parse_expr(EP.Arg(), to_expr(parsed)) == parsed
 end
 
+@testset "Module" begin
+  parser = EP.Module()
+  expr = :(module A
+    something
+    3
+  end)
+  parsed = parse_expr(parser, expr)
+  @test parsed.no_bare == true
+  @test parsed.name == :A
+  @test filter(x -> !isa(x, LineNumberNode), parse_expr(EP.Block(), parsed.body).exprs) == [:something, 3]
+
+  test_closure(parser, expr)
+
+  @test_throws EP.ParseError parse_expr(parser, :(a::Int))
+  @test_throws EP.ParseError parse_expr(parser, quote
+      module A
+    end
+  end)
+end
+
 @testset "Assignment" begin
   parser = EP.Assignment()
   parsed = parse_expr(parser, :(a::Int = 4))

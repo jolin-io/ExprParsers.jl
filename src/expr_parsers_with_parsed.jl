@@ -208,6 +208,37 @@ function parse_expr_ignore_LineNumberNodes(parser::Expr, expr::Expr)
 end
 
 
+# Module
+# ------
+"""
+    EP.Module(no_bare = EP.Isa(Bool), name = EP.anything, body = EP.anything)
+
+Parses the following
+```julia
+module A
+end
+```
+"""
+@exprparser struct Module
+  "indicates whether the module is a standard module (true), or a baremodule (false)"
+  no_bare = Isa(Bool) = true
+  name = anything
+  body = anything = quote end
+end
+
+function parse_expr(parser::Module, expr::Base.Expr)
+  @passert expr.head == :module
+  parse_expr(parser,
+    no_bare = expr.args[1],
+    name = expr.args[2],
+    body = expr.args[3])
+end
+
+function to_expr(parsed::Module_Parsed)
+  Base.Expr(:module, parsed.no_bare, parsed.name, parsed.body)
+end
+
+
 # Macro
 # -----
 
