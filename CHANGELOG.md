@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2021-07-21
+### Changed
+- now using `keys(keywords)` instead of `keywords.itr` because of deprecation warning
+
 ## [1.0.0] - 2020-08-05
 ### Added
 - extensive docstring documentation

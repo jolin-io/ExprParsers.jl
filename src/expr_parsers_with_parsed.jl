@@ -8,7 +8,7 @@ using ProxyInterfaces
 All ExprParserWithParsed have a common parse_expr method, namely that all struct fields are given directly as keyword arguments.
 """
 function parse_expr(parser::ExprParserWithParsed; kw...)
-  names = kw.itr  # kw isa Base.Iterators.Pairs
+  names = keys(kw)  # kw isa Base.Iterators.Pairs
   matches = [parse_expr(getproperty(parser, name), value) for (name, value) in kw]
   kw′ = NamedTuple{names}(matches)
   ExprParsed(typeof(parser))(;kw′...)
