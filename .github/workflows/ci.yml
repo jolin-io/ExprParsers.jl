@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         version:
-          - '1.1'  # we need to have registry support, which starts with 1.1
-          - '1.4'
+          - '1.0'
+          - '1.6'
           - 'nightly'
         os:
           - ubuntu-latest
