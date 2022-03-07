@@ -142,4 +142,10 @@ include("expr_parsers_core.jl")
 include("expr_parsers_with_parsed.jl")
 include("expr_parsers_meta.jl")
 
+
+# to_expr
+# =======
+
+include("to_expr.jl")
+
 end # module

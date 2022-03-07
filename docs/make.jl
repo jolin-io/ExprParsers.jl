@@ -20,4 +20,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/schlichtanders/ExprParsers.jl",
+    devbranch="main",
 )
