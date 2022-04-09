@@ -149,7 +149,7 @@ ERROR: ParseError: Using default `==` comparison, but parser `13` ≠ value `14`
 ```
 Used within [`EP.Expr`](@ref).
 """
-@def_structequal struct Block <: ExprParserWithParsed
+@struct_hash_equal struct Block <: ExprParserWithParsed
   exprs
   ignore_linenumbernodes::Bool
 
@@ -160,7 +160,7 @@ Used within [`EP.Expr`](@ref).
   Block(exprs...; ignore_linenumbernodes=true) = new(exprs, ignore_linenumbernodes)
   Block() = new(Iterator(repeated(anything)), true)
 end
-@def_structequal mutable struct Block_Parsed <: ExprParsed
+@struct_hash_equal mutable struct Block_Parsed <: ExprParsed
   exprs
 end
 ExprParsed(::Base.Type{Block}) = Block_Parsed

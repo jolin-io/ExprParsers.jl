@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - all Parsers now also have `Base.hash` defined in addition to `Base.:(==)`
-- updated `StructEquality` to version 2.0 and hence switched to supporting only Julia 1.6 onwards
+- defined `to_expr` for `TypeVar` for convenience
+
+### Changed
+- updated dependency `StructEquality` to version 2.0
+- supported Julia versions is now 1.6 or higher because 1.6 is the new long term release
 
 ## [1.1.0] - 2021-07-21
 ### Fixed

@@ -29,7 +29,7 @@ julia> parse_expr(parser2, :(a.b = 4))
 ExprParsers.Named{:any,ExprParsers.Assignment_Parsed}(EP.Assignment_Parsed(left=:(a.b), right=4))
 ```
 """
-@def_structequal struct Named{Name, T} <: ExprParser
+@struct_hash_equal struct Named{Name, T} <: ExprParser
   value::T
   Named{Name}(value::T) where {Name, T} = new{Name, T}(value)
 end
@@ -95,7 +95,7 @@ julia> parse_expr(parser, quote
 ERROR: ParseError: Expected type `Symbol`, got `:notasymbol` of type `QuoteNode`.
 ```
 """
-@def_structequal struct Indexed{T} <: ExprParser
+@struct_hash_equal struct Indexed{T} <: ExprParser
   _mapping::Dict
   _paths::Dict
   value::T
