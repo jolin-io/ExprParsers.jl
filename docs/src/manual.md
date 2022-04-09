@@ -17,7 +17,7 @@ Extended Example: Part I Combining Parsers
 
 To understand how to work with `ExprParsers` in practice, it is best to see a full-fledged example.
 
-One nice and complex task would be to implement support for the traitor-like-syntax introduced by the package [`Traitor.jl`](https://github.com/andyferris/Traitor.jl). The syntax may no longer be the nicest, but still it is quite powerful and serves as a good example (I myself build another Traits package which extends where syntax instead, which many people may find more intuitive these days [`WhereTraits.jl`](https://github.com/schlichtanders/WhereTraits.jl)).
+One nice and complex task would be to implement support for the traitor-like-syntax introduced by the package [`Traitor.jl`](https://github.com/andyferris/Traitor.jl). The syntax may no longer be the nicest, but still it is quite powerful and serves as a good example (I myself build another Traits package which extends where syntax instead, which many people may find more intuitive these days [`WhereTraits.jl`](https://github.com/jolin-io/WhereTraits.jl)).
 
 In Traitor syntax, you have a double type annotation `argument::StandardType::TraitsType`. The `StandardType` is a plain julia type like `Int` or `AbstractArray`. The `TraitsType` is something similar to `Base.HasEltype` or `Base.HasLength`. For our goal it doesn't matter so much, we just want to parse the syntax.
 
