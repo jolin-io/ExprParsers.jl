@@ -82,8 +82,8 @@ macro exprparser(combined_struct_expr)
 
   # TODO Parsed(..) calls also for typeparameters?
   esc(quote
-    ExprParsers.StructEquality.@def_structequal Base.@kwdef $parser_struct_expr
-    ExprParsers.StructEquality.@def_structequal Base.@kwdef $parsed_struct_expr
+    ExprParsers.StructEquality.@struct_hash_equal Base.@kwdef $parser_struct_expr
+    ExprParsers.StructEquality.@struct_hash_equal Base.@kwdef $parsed_struct_expr
     ExprParsers.ExprParsed(::Base.Type{<:$parser_struct_name}) = $parsed_struct_name
   end)
 end

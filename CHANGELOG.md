@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2022-04-09
+
+### Added
+- all Parsers now also have `Base.hash` defined in addition to `Base.:(==)`
+- updated `StructEquality` to version 2.0 and hence switched to supporting only Julia 1.6 onwards
+
 ## [1.1.0] - 2021-07-21
 ### Fixed
 - Julia 1.0 seems to be failing, Compat entry is now correctly set to julia 1.1. (The community guidelines says that Compat entry updates are breaking. As it hasn't worked before, this is not breaking, but for auto-merging we increase the version nevertheless.)
