@@ -12,13 +12,43 @@ In macros you often not only want to inspect the given `Expr` in efficient and s
 
 We guarantee that `parse_expr` and `to_expr` are working nicely together, i.e. the following always holds for arbitrary expressions and parsers
 ```julia
-using ExprParsers  # comes with a shorthand EP for ExprParsers
-parser = EP.Function()
-expr = :(f(a) = 2a))
-parsed = parse_expr(parser, expr)
+julia> using ExprParsers
 
-# applying the parser "twice" returns always the same parsed result
-parse_expr(parser, to_expr(parsed)) == parsed
+julia> # comes with a shorthand EP for ExprParsers
+
+julia> parser = EP.Function()
+EP.Function(
+  name    = ExprParsers.Isa{Any}()
+  curlies = ExprParsers.Isa{Any}()
+  args    = ExprParsers.Isa{Any}()
+  kwargs  = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+  body    = ExprParsers.Isa{Any}()
+)
+
+julia> expr = :(f(a) = 2a)
+:(f(a) = begin
+          #= REPL[8]:1 =#
+          2a
+      end)
+
+julia> parsed = parse_expr(parser, expr)
+EP.Function_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = Any[:a]
+  kwargs  = Any[]
+  wheres  = Any[]
+  body    = quote
+    #= REPL[8]:1 =#
+    2a
+end
+)
+
+julia> # applying the parser "twice" returns always the same parsed result
+
+julia> parse_expr(parser, to_expr(parsed)) == parsed
+true
 ```
 
 Note that `ExprParsers` exports a constant `EP` which is an alias for the package `ExprParsers` itself. This comes in very handy when you use the custom parsers a lot.
@@ -28,11 +58,8 @@ Checkout the `test/` directory for seeing more examples, especially `test/expr_p
 
 ## Installation
 
-The package is soon going to be registered at General, until then you can use it by adding a custom registry.
 ```julia
 using Pkg
-pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
-pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
 pkg"add ExprParsers"
 ```
 
