@@ -130,7 +130,7 @@ julia> parse_expr.(parser_arg, parsed_function.args)
  EP.Arg_Parsed(name=:a, type=Any, default=ExprParsers.NoDefault())
  EP.Arg_Parsed(name=EP.TypeAnnotation_Parsed(name=:b, type=:Int), type=:HasSomeTrait, default=ExprParsers.NoDefault())
 ```
-There we are! We have build or parsing pipeline in a very straightforward and intuitive manner and ended up at having all the information parsed in a need way.
+Here we are! We created our parser pipeline in a very simple and intuitive way and in the end we parsed all the information.
 
 
 Extended Example: Part II Working with parsed results
@@ -357,7 +357,7 @@ julia> function EP.to_expr(parsed::TraitorArgExprParser_Parsed)
            end
          else
            # Note that function keyword arguments are constructed using `Expr(:kw, ...)` and not plain `=`
-           if parsed.traitstype == Any   
+           if parsed.traitstype == Any
              Expr(:kw, :($(parsed.name)::$(parsed.type)), parsed.default)
            else
              Expr(:kw, :($(parsed.name)::$(parsed.type)::$(parsed.traitstype)), parsed.default)

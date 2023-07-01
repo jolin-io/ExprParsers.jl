@@ -18,8 +18,6 @@ Short alias for the `ExprParsers` package.
 """
 const EP = ExprParsers
 
-using Compat
-
 
 include("Utils.jl")
 using .Utils

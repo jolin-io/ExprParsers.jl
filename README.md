@@ -3,7 +3,7 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://jolin-io.github.io/ExprParsers.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://jolin-io.github.io/ExprParsers.jl/dev)
 [![Build Status](https://github.com/jolin-io/ExprParsers.jl/workflows/CI/badge.svg)](https://github.com/jolin-io/ExprParsers.jl/actions)
-[![Coverage](https://codecov.io/gh/jolin-io/ExprParsers.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jolin-io/ExprParsers.jl)
+[![Coverage](https://codecov.io/gh/jolin-io/ExprParsers.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/jolin-io/ExprParsers.jl)
 
 
 `ExprParsers` is a library made to simplify development of elaborate macros.
