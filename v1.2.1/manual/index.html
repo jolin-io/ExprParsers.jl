@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Manual · ExprParsers.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://jolin-io.github.io/ExprParsers.jl/manual/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">ExprParsers.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Manual</a><ul class="internal"><li><a class="tocitem" href="#Extended-Example:-Part-I-Combining-Parsers"><span>Extended Example: Part I Combining Parsers</span></a></li><li><a class="tocitem" href="#Extended-Example:-Part-II-Working-with-parsed-results"><span>Extended Example: Part II Working with parsed results</span></a></li><li><a class="tocitem" href="#Extended-Example:-Part-III-creating-Expr-again"><span>Extended Example: Part III creating Expr again</span></a></li><li><a class="tocitem" href="#Extended-Example:-Part-IV-Defining-your-own-ExprParser-with-EP.@exprparser"><span>Extended Example: Part IV Defining your own ExprParser with <code>EP.@exprparser</code></span></a></li></ul></li><li><a class="tocitem" href="../library/">Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Manual</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Manual</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/jolin-io/ExprParsers.jl/blob/main/docs/src/manual.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Manual"><a class="docs-heading-anchor" href="#Manual">Manual</a><a id="Manual-1"></a><a class="docs-heading-anchor-permalink" href="#Manual" title="Permalink"></a></h1><p><code>ExprParsers</code> exports a constant <code>EP</code> which is an alias for the package <code>ExprParsers</code> itself. This comes in very handy when you use the custom parsers a lot.</p><p>The main interface encompass just three concepts, which seamlessly interact with oneanother</p><ul><li>macro <a href="@ref @exprparser"><code>EP.@exprparser</code></a>: easily create definitions for highly flexible and nestable parsers</li><li>function <a href="../library/#ExprParsers.parse_expr"><code>parse_expr</code></a>: compares a parser with a value, and returns a parsed result</li><li>function <a href="../library/#ExprParsers.to_expr"><code>to_expr</code></a>: transforms parsed values back to <code>Base.Expr</code></li></ul><p>Many parsers have already been defined, ready for use, and well documented. Take a look at <a href="../library/#Public-API">Public API</a>.</p><h2 id="Extended-Example:-Part-I-Combining-Parsers"><a class="docs-heading-anchor" href="#Extended-Example:-Part-I-Combining-Parsers">Extended Example: Part I Combining Parsers</a><a id="Extended-Example:-Part-I-Combining-Parsers-1"></a><a class="docs-heading-anchor-permalink" href="#Extended-Example:-Part-I-Combining-Parsers" title="Permalink"></a></h2><p>To understand how to work with <code>ExprParsers</code> in practice, it is best to see a full-fledged example.</p><p>One nice and complex task would be to implement support for the traitor-like-syntax introduced by the package <a href="https://github.com/andyferris/Traitor.jl"><code>Traitor.jl</code></a>. The syntax may no longer be the nicest, but still it is quite powerful and serves as a good example (I myself build another Traits package which extends where syntax instead, which many people may find more intuitive these days <a href="https://github.com/jolin-io/WhereTraits.jl"><code>WhereTraits.jl</code></a>).</p><p>In Traitor syntax, you have a double type annotation <code>argument::StandardType::TraitsType</code>. The <code>StandardType</code> is a plain julia type like <code>Int</code> or <code>AbstractArray</code>. The <code>TraitsType</code> is something similar to <code>Base.HasEltype</code> or <code>Base.HasLength</code>. For our goal it doesn&#39;t matter so much, we just want to parse the syntax.</p><p>Let&#39;s start with loading the package and creating a default parser for functions.</p><pre><code class="language-julia-repl hljs">julia&gt; using ExprParsers
+
+julia&gt; parser_function = EP.Function(name = EP.anysymbol)
+EP.Function(
+  name    = ExprParsers.Isa{Symbol}()
+  curlies = ExprParsers.Isa{Any}()
+  args    = ExprParsers.Isa{Any}()
+  kwargs  = ExprParsers.Isa{Any}()
+  wheres  = ExprParsers.Isa{Any}()
+  body    = ExprParsers.Isa{Any}()
+)</code></pre><p>As you can see, we only gave a subparser for the field <code>name</code> which captures the function name. All other substructures default to be able to parse anything.</p><p>Now we parse our first function. Mind that we need to use <code>:(...)</code> for constructing Expr, as <code>quote...end</code> would introduce an additional <code>Expr(:block, ...)</code> layer.</p><pre><code class="language-julia-repl hljs">julia&gt; parsed_function = parse_expr(parser_function, :(
+         function f(a, b::Int::HasSomeTrait)
+            &quot;a = $a, b = $b, sometrait(b) = $(sometrait(b))&quot;
+         end
+       ))
+EP.Function_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = Any[:a, :((b::Int)::HasSomeTrait)]
+  kwargs  = Any[]
+  wheres  = Any[]
+  body    = quote
+    #= none:3 =#
+    &quot;a = $(a), b = $(b), sometrait(b) = $(sometrait(b))&quot;
+end
+)</code></pre><p>We have our parsed function, but the arguments are still quite rough. Lets parse them further by using <code>EP.Arg</code>. Conveniently, all ExprParsers support broadcasting syntax.</p><pre><code class="language-julia-repl hljs">julia&gt; parsed_args = parse_expr.(EP.Arg(), parsed_function.args)
+2-element Array{ExprParsers.Arg_Parsed,1}:
+ EP.Arg_Parsed(name=:a, type=Any, default=ExprParsers.NoDefault())
+ EP.Arg_Parsed(name=:(b::Int), type=:HasSomeTrait, default=ExprParsers.NoDefault())</code></pre><p>That is nice, we captured <code>HasSomeTrait</code> in the type field. This is because <code>argument::StandardType::TraitsType</code> is evaluated as <code>(argument::StandardType)::TraitsType</code>. So we would like to get access to the <code>b::Int</code> as well.</p><p>But now things start to get difficult, because there is also <code>:a</code> with <code>type=Any</code>, and somehow we need to separate both cases.</p><p>We can easily do this by defining more specific parsers. Lets start with the &quot;standard&quot; Parser.</p><pre><code class="language-julia-repl hljs">julia&gt; parser_standard_arg = EP.Arg(name=EP.anysymbol)
+EP.Arg(
+  name    = ExprParsers.Isa{Symbol}()
+  type    = ExprParsers.Isa{Any}()
+  default = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser_standard_arg, parsed_function.args[1])
+EP.Arg_Parsed(
+  name    = :a
+  type    = Any
+  default = ExprParsers.NoDefault()
+)
+julia&gt; parse_expr(parser_standard_arg, parsed_function.args[2])
+ERROR: ParseError: Expected type `Symbol`, got `b::Int` of type `Expr`.</code></pre><p>That looks very good: Our new parser only parsers standard arguments and fails on traitor-like syntax. In addition it super simple - we just required the name to be a <code>Base.Symbol</code>.</p><p>Now let&#39;s define the traitor-argument. We know that the &quot;name&quot; field will be just another type-annotation. Let&#39;s use that knowledge straight away.</p><pre><code class="language-julia-repl hljs">julia&gt; parser_traitor_arg = EP.Arg(name=EP.TypeAnnotation())
+EP.Arg(
+  name    = EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}())
+  type    = ExprParsers.Isa{Any}()
+  default = ExprParsers.Isa{Any}()
+)
+julia&gt; parse_expr(parser_traitor_arg, parsed_function.args[1])
+ERROR: ParseError: ExprParsers.TypeAnnotation has no `parse_expr` method defined to capture Type `Symbol`. Got: `a`.
+julia&gt; parse_expr(parser_traitor_arg, parsed_function.args[2])
+EP.Arg_Parsed(
+  name    = EP.TypeAnnotation_Parsed(name=:b, type=:Int)
+  type    = :HasSomeTrait
+  default = ExprParsers.NoDefault()
+)</code></pre><p>It worked. We only parsed traitor syntax, and now have all the components readily available.</p><p>We have all the pieces together, now we just need to combine them. <code>EP.AnyOf</code> is the natural choice to combine multiple parsers by falling back to the next if the first fails.</p><pre><code class="language-julia-repl hljs">julia&gt; parser_arg = EP.AnyOf(parser_standard_arg, parser_traitor_arg)
+ExprParsers.AnyOf{Tuple{ExprParsers.Arg,ExprParsers.Arg}}((EP.Arg(name=ExprParsers.Isa{Symbol}(), type=ExprParsers.Isa{Any}(), default=ExprParsers.Isa{Any}()), EP.Arg(name=EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}()), type=ExprParsers.Isa{Any}(), default=ExprParsers.Isa{Any}())), &quot;&quot;)
+julia&gt; parse_expr(parser_arg, parsed_function.args[1])
+EP.Arg_Parsed(
+  name    = :a
+  type    = Any
+  default = ExprParsers.NoDefault()
+)
+julia&gt; parse_expr(parser_arg, parsed_function.args[2])
+EP.Arg_Parsed(
+  name    = EP.TypeAnnotation_Parsed(name=:b, type=:Int)
+  type    = :HasSomeTrait
+  default = ExprParsers.NoDefault()
+)
+julia&gt; parse_expr.(parser_arg, parsed_function.args)
+2-element Array{ExprParsers.Arg_Parsed,1}:
+ EP.Arg_Parsed(name=:a, type=Any, default=ExprParsers.NoDefault())
+ EP.Arg_Parsed(name=EP.TypeAnnotation_Parsed(name=:b, type=:Int), type=:HasSomeTrait, default=ExprParsers.NoDefault())</code></pre><p>Here we are! We created our parser pipeline in a very simple and intuitive way and in the end we parsed all the information.</p><h2 id="Extended-Example:-Part-II-Working-with-parsed-results"><a class="docs-heading-anchor" href="#Extended-Example:-Part-II-Working-with-parsed-results">Extended Example: Part II Working with parsed results</a><a id="Extended-Example:-Part-II-Working-with-parsed-results-1"></a><a class="docs-heading-anchor-permalink" href="#Extended-Example:-Part-II-Working-with-parsed-results" title="Permalink"></a></h2><p>One thing which is missing though, is to extract the information in a convenient way. In julia the most convenient way is to use dispatch. But how to dispatch in the example above? Both versions are of type <code>ExprParsers.Arg_Parsed</code>.</p><p>We could have made the types more complicated, e.g. by including the types of all subparsers as well, however we decided against it and in favour for a simple meta-type <code>EP.Named{Tag}</code>. Bringing this into a meta-expr-parser has the big advantage that you can easily create your own ExprParsers without bothering about the precise types you use.</p><p><code>EP.Named{Tag}(some_parser)</code> constructs a named version of your parser, which preserves the name when put through <code>parse_expr</code>. That is it&#39;s key purpose. Let&#39;s see it it in action.</p><pre><code class="language-julia-repl hljs">julia&gt; parser_arg_named = EP.AnyOf(
+         EP.Named{:standard}(parser_standard_arg),
+         EP.Named{:traitor}(parser_traitor_arg)
+       )
+ExprParsers.AnyOf{Tuple{ExprParsers.Named{:standard,ExprParsers.Arg},ExprParsers.Named{:traitor,ExprParsers.Arg}}}((ExprParsers.Named{:standard,ExprParsers.Arg}(EP.Arg(name=ExprParsers.Isa{Symbol}(), type=ExprParsers.Isa{Any}(), default=ExprParsers.Isa{Any}())), ExprParsers.Named{:traitor,ExprParsers.Arg}(EP.Arg(name=EP.TypeAnnotation(name=ExprParsers.Isa{Any}(), type=ExprParsers.Isa{Any}()), type=ExprParsers.Isa{Any}(), default=ExprParsers.Isa{Any}()))), &quot;&quot;)
+julia&gt; parsed_args = parse_expr.(parser_arg_named, parsed_function.args)
+2-element Array{ExprParsers.Named{Name,ExprParsers.Arg_Parsed} where Name,1}:
+ ExprParsers.Named{:standard,ExprParsers.Arg_Parsed}(EP.Arg_Parsed(name=:a, type=Any, default=ExprParsers.NoDefault()))
+ ExprParsers.Named{:traitor,ExprParsers.Arg_Parsed}(EP.Arg_Parsed(name=EP.TypeAnnotation_Parsed(name=:b, type=:Int), type=:HasSomeTrait, default=ExprParsers.NoDefault()))</code></pre><p>We did the same as before, but added some type-tags to the results. You see that wrapping a parser into <code>EP.Named{Tag}(...)</code> will seamlessly and intuitively pass on the <code>Tag</code> to the parsed result. That is exactly what we need to simplify our dispatch.</p><p>Finally, let&#39;s write some utility which extracts all the Traitor information in a custom type.</p><pre><code class="language-julia-repl hljs">julia&gt; Base.@kwdef struct TraitorArg
+         name
+         type
+         traitstype
+         default
+       end
+TraitorArg
+julia&gt; extract_traitsarg(parsed::EP.Named{:standard}) = TraitorArg(
+         name = parsed[].name,
+         type = parsed[].type,
+         traitstype = Any,
+         default = parsed[].default,
+       )
+extract_traitsarg (generic function with 1 method)
+julia&gt; extract_traitsarg(parsed::EP.Named{:traitor}) = TraitorArg(
+         name = parsed[].name.name,
+         type = parsed[].name.type,
+         traitstype = parsed[].type,
+         default = parsed[].default,
+       )
+extract_traitsarg (generic function with 2 methods)
+julia&gt; traitor_args = extract_traitsarg.(parse_expr.(parser_arg_named, parsed_function.args))
+2-element Array{TraitorArg,1}:
+ TraitorArg(:a, Any, Any, ExprParsers.NoDefault())
+ TraitorArg(:b, :Int, :HasSomeTrait, ExprParsers.NoDefault())</code></pre><p>Super clean result and intuitive Julian style of programming. You can see that the use of <code>EP.Named</code> actually simplified the dispatch a lot and made it extremely readable.</p><p>From here on you can start to fill the traitor syntax with life. It turns out that we missed on one special Traitor-syntax case. Concretely, the argument style <code>a::::TraitsType</code> is officially supported, but not captured by either of the above. If I got you motivated, try to implement this case yourself!</p><p>I hope you enjoyed this extended example and got a good feeling of how to work with <code>ExprParsers</code>.</p><h2 id="Extended-Example:-Part-III-creating-Expr-again"><a class="docs-heading-anchor" href="#Extended-Example:-Part-III-creating-Expr-again">Extended Example: Part III creating Expr again</a><a id="Extended-Example:-Part-III-creating-Expr-again-1"></a><a class="docs-heading-anchor-permalink" href="#Extended-Example:-Part-III-creating-Expr-again" title="Permalink"></a></h2><p>Almost forgot: When defining your own macro there will come the time when you want to construct <code>Expr</code> objects again in order to return them to the user.</p><p><code>ExprParsers</code> are also made for this task. One way to do this is to manipulate the parsed results directly. Let&#39;s see what this means.</p><pre><code class="language-julia-repl hljs">julia&gt; using ExprParsers
+
+julia&gt; parsed = parse_expr(EP.Function(), :(f(x) = x))
+EP.Function_Parsed(
+  name    = :f
+  curlies = Any[]
+  args    = Any[:x]
+  kwargs  = Any[]
+  wheres  = Any[]
+  body    = quote
+    #= none:1 =#
+    x
+end
+)
+julia&gt; parsed.name = :anothername;
+
+julia&gt; parsed
+EP.Function_Parsed(
+  name    = :anothername
+  curlies = Any[]
+  args    = Any[:x]
+  kwargs  = Any[]
+  wheres  = Any[]
+  body    = quote
+    #= none:1 =#
+    x
+end
+)
+julia&gt; to_expr(parsed)
+:(function anothername(x)
+      #= none:1 =#
+      x
+  end)</code></pre><p>The key is that every parsed result can be converted to an Expr by using <code>to_expr</code>.</p><p>The second way to construct Expr is by constructing parsed objects directly. You just have to use the <code>EP.Function_Parsed</code> instead of <code>EP.Function</code>, i.e. appending <code>_Parsed</code> to your parser type and you get the constructor for the parsed object. It supports keyword assignment together with useful default values. In general it is very handy.</p><pre><code class="language-julia-repl hljs">julia&gt; using ExprParsers
+
+julia&gt; func = EP.Function_Parsed(
+         name = :myfunc,
+         args = [:(a::T), EP.Arg_Parsed(name = :b, default = 42)],
+         kwargs = [EP.Arg_Parsed(name = :c, default = :hi)],
+         wheres = [:T],
+         body = :(a + b)
+       )
+EP.Function_Parsed(
+  name    = :myfunc
+  curlies = Any[]
+  args    = Any[:(a::T), EP.Arg_Parsed(name=:b, type=Any, default=42)]
+  kwargs  = ExprParsers.Arg_Parsed[EP.Arg_Parsed(name=:c, type=Any, default=:hi)]
+  wheres  = [:T]
+  body    = :(a + b)
+)
+julia&gt; to_expr(func)
+:(function myfunc(a::T, b = 42; c = hi) where T
+      a + b
+  end)</code></pre><p>For instance, for the Traitor syntax such manual construction would be needed, as quite some transformations need to happen to arrive at the traits semantics. As you can see, it is very easy to do this using <code>ExprParsers</code>.</p><h2 id="Extended-Example:-Part-IV-Defining-your-own-ExprParser-with-EP.@exprparser"><a class="docs-heading-anchor" href="#Extended-Example:-Part-IV-Defining-your-own-ExprParser-with-EP.@exprparser">Extended Example: Part IV Defining your own ExprParser with <code>EP.@exprparser</code></a><a id="Extended-Example:-Part-IV-Defining-your-own-ExprParser-with-EP.@exprparser-1"></a><a class="docs-heading-anchor-permalink" href="#Extended-Example:-Part-IV-Defining-your-own-ExprParser-with-EP.@exprparser" title="Permalink"></a></h2><p>As a final little excurse about the Traitor syntax example, I would like to show you how you can easily build your own ExprParsers using the macro <code>EP.@exprparsers</code>. It is also used internally to most of the parsers available.</p><p>For example, let us rewrite the previous code which we used to extract Traitor information. For easier reference, here a self-containing copy of what we did above:</p><pre><code class="language-julia-repl hljs">julia&gt; using ExprParsers
+
+julia&gt; parser_standard_arg = EP.Arg(name=EP.anysymbol);
+
+julia&gt; parser_traitor_arg = EP.Arg(name=EP.TypeAnnotation());
+
+julia&gt; parser_arg_named = EP.AnyOf(
+         EP.Named{:standard}(parser_standard_arg),
+         EP.Named{:traitor}(parser_traitor_arg),
+       );
+
+julia&gt; Base.@kwdef struct TraitorArg
+         name
+         type
+         traitstype
+         default
+       end
+TraitorArg
+julia&gt; extract_traitsarg(parsed::EP.Named{:standard}) = TraitorArg(
+         name = parsed[].name,
+         type = parsed[].type,
+         traitstype = Any,
+         default = parsed[].default,
+       )
+extract_traitsarg (generic function with 1 method)
+julia&gt; extract_traitsarg(parsed::EP.Named{:traitor}) = TraitorArg(
+         name = parsed[].name.name,
+         type = parsed[].name.type,
+         traitstype = parsed[].type,
+         default = parsed[].default,
+       )
+extract_traitsarg (generic function with 2 methods)
+julia&gt; # which we then used for extraction
+
+julia&gt; parsed_function = parse_expr(EP.Function(), :(
+         function f(a, b::Int::HasSomeTrait)
+            &quot;a = $a, b = $b, sometrait(b) = $(sometrait(b))&quot;
+         end
+       ));
+
+julia&gt; traitor_args = extract_traitsarg.(parse_expr.(parser_arg_named, parsed_function.args))
+2-element Array{TraitorArg,1}:
+ TraitorArg(:a, Any, Any, ExprParsers.NoDefault())
+ TraitorArg(:b, :Int, :HasSomeTrait, ExprParsers.NoDefault())</code></pre><p>We can easily transform this into a full-fledged <code>ExprParser</code> by making using of the <code>EP.@exprparser</code> macro.</p><pre><code class="language-julia-repl hljs">julia&gt; EP.@exprparser struct TraitorArgExprParser
+         name = EP.anything
+         type = EP.anything = Any
+         traitstype = EP.anything = Any
+         default = EP.anything = EP.nodefault
+       end;
+
+julia&gt; function EP.parse_expr(parser::TraitorArgExprParser, expr)
+         _parse_expr_traitor(parser, parse_expr(parser_arg_named, expr))
+       end;
+
+julia&gt; _parse_expr_traitor(parser, parsed::EP.Named{:standard}) = parse_expr(parser,
+         name = parsed[].name,
+         type = parsed[].type,
+         traitstype = Any,
+         default = parsed[].default,
+       )
+_parse_expr_traitor (generic function with 1 method)
+julia&gt; _parse_expr_traitor(parser, parsed::EP.Named{:traitor}) = parse_expr(parser,
+         name = parsed[].name.name,
+         type = parsed[].name.type,
+         traitstype = parsed[].type,
+         default = parsed[].default,
+       )
+_parse_expr_traitor (generic function with 2 methods)
+julia&gt; function EP.to_expr(parsed::TraitorArgExprParser_Parsed)
+         if parsed.default === EP.nodefault
+           if parsed.traitstype == Any
+             :($(parsed.name)::$(parsed.type))
+           else
+             :($(parsed.name)::$(parsed.type)::$(parsed.traitstype))
+           end
+         else
+           # Note that function keyword arguments are constructed using `Expr(:kw, ...)` and not plain `=`
+           if parsed.traitstype == Any
+             Expr(:kw, :($(parsed.name)::$(parsed.type)), parsed.default)
+           else
+             Expr(:kw, :($(parsed.name)::$(parsed.type)::$(parsed.traitstype)), parsed.default)
+           end
+         end
+       end;
+</code></pre><p>That defines the <code>ExprParser</code> as well as the key interface <code>parse_expr</code> and <code>to_expr</code>. Let&#39;s go through it one by one. First we defined the parser using <code>EP.@exprparser</code>. It is very much identical to defining a simple struct with <code>Base.kwdef</code> support, only that in addition you can make use of a neat double-default-syntax. <code>default = EP.anything = EP.nodefault</code> means that the &quot;first&quot; default value <code>EP.anything</code> is the default sub-parser which is used when constructing an <code>TraitorArgExprParser</code>, while the &quot;second&quot; default value <code>EP.nodefault</code> is the default value used when constructing the parsed result <code>TraitorArgExprParser_Parsed</code>.</p><p>Then we defined <code>parse_expr(...)</code> for our new type, which simply dispatches on the <code>Named{Tag}</code> parsers within the sub-function <code>_parse_expr_traitor</code> to actually construct the parsed results. One general feature we used here is that <code>parse_expr(...)</code> by default always supports a generic keyword syntax <code>parse_expr(parser, field1 = :value_to_be_parsed, field2 = ...)</code> which translates to constructing the parsed result, with all fields matched by the respective sub-parsers <code>..._Parsed(field1 = parse_expr(parser.field1, :value_to_be_parsed), field2 = ...)</code>. Using this syntax we make sure that always all sub-parsers are actually used and not overlooked accidentally.</p><p>Finally we also overloaded <code>EP.to_expr</code> on top of the <code>..._Parsed</code> type so that we can easily convert traitor arguments back to proper <code>Base.Expr</code> objects.</p><p>It is not much to define, and everything very straightforward. Now we have a fully flexible full-fledged TraitorArgument parser. Let&#39;s see it in action.</p><pre><code class="language-julia-repl hljs">julia&gt; parser_traitor_arg = TraitorArgExprParser(default = EP.Isa(Union{EP.NoDefault, Int}))
+EP.TraitorArgExprParser(
+  name       = ExprParsers.Isa{Any}()
+  type       = ExprParsers.Isa{Any}()
+  traitstype = ExprParsers.Isa{Any}()
+  default    = ExprParsers.Isa{Union{ExprParsers.NoDefault, Int64}}()
+)
+julia&gt; traitor_args = parse_expr.(parser_traitor_arg, parsed_function.args)
+2-element Array{TraitorArgExprParser_Parsed,1}:
+ EP.TraitorArgExprParser_Parsed(name=:a, type=Any, traitstype=Any, default=ExprParsers.NoDefault())
+ EP.TraitorArgExprParser_Parsed(name=:b, type=:Int, traitstype=:HasSomeTrait, default=ExprParsers.NoDefault())
+julia&gt; traitor_arg = parse_expr(parser_traitor_arg, Expr(:kw, :(a::Int::TraitsType), 4))  # Note that we need to use `Expr(:kw, ...)` to construct function keyword arguments
+EP.TraitorArgExprParser_Parsed(
+  name       = :a
+  type       = :Int
+  traitstype = :TraitsType
+  default    = 4
+)
+julia&gt; to_expr(traitor_arg)
+:($(Expr(:kw, :((a::Int)::TraitsType), 4)))
+julia&gt; parse_expr(parser_traitor_arg, Expr(:kw, :(a::String::TraitsType), &quot;hi&quot;))
+ERROR: ParseError: Expected type `Union{ExprParsers.NoDefault, Int64}`, got `hi` of type `String`.</code></pre><p>All works well, and also our example restriction to only accept <code>Int</code> default values, or no default at all, works as intended. As you see, the <code>ExprParsers</code> package even comes with pretty printing of your custom <code>@exprparser</code> type.</p><p>The <code>ExprParsers</code> package, with <code>parse_expr</code>, <code>to_expr</code> and <code>@exprparser</code> at its core, provides an interface which is easy to understand, easy to work with and easy to extend. Having defined the interface, many tedious and repetitive <code>Expr</code>-parsing tasks are well encapsulated and it becomes much easier to construct further macro-semantics on top of it.</p><p>I hope you enjoy the package.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../library/">Library »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Saturday 1 July 2023 09:48">Saturday 1 July 2023</span>. Using Julia version 1.9.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
