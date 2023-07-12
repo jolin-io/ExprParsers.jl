@@ -914,7 +914,7 @@ function parse_expr(parser::TypeRange, expr::Base.Expr)
   end
 end
 
-to_expr(parsed::TypeRange_Parsed) = _to_expr_TypeRange(parsed.lb, parsed.name, parsed.ub)
+to_expr(parsed::TypeRange_Parsed) = _to_expr_TypeRange(to_expr(parsed.lb), to_expr(parsed.name), to_expr(parsed.ub))
 _to_expr_TypeRange(::Base.Type{Union{}}, name, ::Base.Type{Any}) = name
 _to_expr_TypeRange(lb, name, ::Base.Type{Any}) = :($name >: $lb)
 _to_expr_TypeRange(::Base.Type{Union{}}, name, ub) = :($name <: $ub)
@@ -1065,16 +1065,16 @@ function parse_expr(parser::Arg, expr::Base.Expr)
   end
 end
 
-to_expr(parsed::Arg_Parsed) = _to_expr_Arg(parsed.name, parsed.type, parsed.default)
+to_expr(parsed::Arg_Parsed) = _to_expr_Arg(to_expr(parsed.name), to_expr(parsed.type), to_expr(parsed.default))
 _to_expr_Arg(::Nothing, ::Base.Type{Any}, ::NoDefault) = :(::Any)
-_to_expr_Arg(::Nothing, type, ::NoDefault) = :(::$(to_expr(type)))
-_to_expr_Arg(name, ::Base.Type{Any}, ::NoDefault) = to_expr(name)
+_to_expr_Arg(::Nothing, type, ::NoDefault) = :(::$type)
+_to_expr_Arg(name, ::Base.Type{Any}, ::NoDefault) = name
 function _to_expr_Arg(name, type, ::NoDefault)
   if type === Vararg
-    Base.Expr(:..., to_expr(name))
+    Base.Expr(:..., name)
   else
-    :($(to_expr(name))::$(to_expr(type)))
+    :($name::$type)
   end
 end
-_to_expr_Arg(name, ::Base.Type{Any}, default) = Base.Expr(:kw, to_expr(name), to_expr(default))
-_to_expr_Arg(name, type, default) = Base.Expr(:kw, :($(to_expr(name))::$(to_expr(type))), to_expr(default))
+_to_expr_Arg(name, ::Base.Type{Any}, default) = Base.Expr(:kw, name, default)
+_to_expr_Arg(name, type, default) = Base.Expr(:kw, :($name::$type), default)

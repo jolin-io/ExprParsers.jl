@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2023-07-12
+### Fixed
+- `to_expr(::EP.TypeRange)` now recursively calls `to_expr`
+
 ## [1.2.1] - 2023-07-01
 ### Changed
 - removed Compat dependency
