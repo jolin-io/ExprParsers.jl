@@ -140,7 +140,7 @@ function _find_object(obj, nested::Union{Vector, Tuple, Dict})
   i = findfirst(nested) do x
     obj === x
   end
-  issomething(i) && return i
+  issomething(i) && return [i]
 
   # recurse if nothing found
   # return first non-nothing value

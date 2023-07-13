@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2023-07-13
+### Fixed
+- `EP.Indexed` failed if index was not nested
+
 ## [1.2.2] - 2023-07-12
 ### Fixed
 - `to_expr(::EP.TypeRange)` now recursively calls `to_expr`
