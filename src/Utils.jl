@@ -81,6 +81,8 @@ function split_where(e::Base.Expr)
   end
 end
 
+unval(::Val{T}) where T = T
+# TODO get rid of get, because this is discouraged in julia 1.10+
 Base.get(::Val{T}) where T = T
 
 issomething(::Nothing) = false
